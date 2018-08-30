@@ -374,8 +374,8 @@ class RiemannianTensorCompletionStructural(object):
         i = 0
         cost_nan = False
         self.logger.info("Epsilon: " + str(self.epsilon))
-        #while gradnorm_val > self.epsilon: 
-        for k in range(3):
+        while gradnorm_val > self.epsilon: 
+        #for k in range(3):
             i = i + 1
             F_v, gradnorm_val, alpha_val, theta_val, beta_val, cost_new_val, cost_val, tsc_score_val, eta_norm_val, inprod_grad_eta_val, riemannian_grad_norm_val, _, _, _, _, _, _ = self.sess.run([self.loss, self.gradnorm_omega, self.alpha,
                            self.theta, self.beta, self.cost_new, self.cost,

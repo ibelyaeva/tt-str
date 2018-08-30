@@ -18,11 +18,11 @@ config = config
 def complete_random_4D():
     subject_scan_path = du.get_full_path_subject1()
     meta = mdt.Metadata('random', 4)
-    root_dir = config.get('log', 'scratch.dir4D')
+    root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.9, 0.8, 0.7, 0.6, 0.65, 0.5, 0.4, 0.35, 0.3, 0.2, 0.1]
-    observed_ratio_list = [0.95,0.9]
+    observed_ratio_list = [0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+    #observed_ratio_list = [0.95,0.9]
     
     x0, y0, z0 = (2,32,22)
     # size 1
@@ -47,11 +47,11 @@ def complete_random_4D():
 def complete_random_4Dsize1():
     subject_scan_path = du.get_full_path_subject1()
     meta = mdt.Metadata('random', 4)
-    root_dir = config.get('log', 'scratch.dir4D')
+    root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.9, 0.8, 0.7, 0.6, 0.65, 0.5, 0.4, 0.35, 0.3, 0.2, 0.1]
-    observed_ratio_list = [0.95,0.9]
+    observed_ratio_list = [0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+    #observed_ratio_list = [0.95,0.9]
     
     x0, y0, z0 = (2,32,22)
     # size 1
@@ -64,11 +64,11 @@ def complete_random_4Dsize1():
 def complete_random_4Dsize2():
     subject_scan_path = du.get_full_path_subject1()
     meta = mdt.Metadata('random', 4)
-    root_dir = config.get('log', 'scratch.dir4D')
+    root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.9, 0.8, 0.7, 0.6, 0.65, 0.5, 0.4, 0.35, 0.3, 0.2, 0.1]
-    observed_ratio_list = [0.95,0.9]
+    observed_ratio_list = [0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+    #observed_ratio_list = [0.95,0.9]
     
     x0, y0, z0 = (2,32,22)
       
@@ -81,11 +81,10 @@ def complete_random_4Dsize2():
 def complete_random_4Dsize3():
     subject_scan_path = du.get_full_path_subject1()
     meta = mdt.Metadata('random', 4)
-    root_dir = config.get('log', 'scratch.dir4D')
+    root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.9, 0.8, 0.7, 0.6, 0.65, 0.5, 0.4, 0.35, 0.3, 0.2, 0.1]
-    observed_ratio_list = [0.95,0.9]
+    observed_ratio_list = [0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
     
     x0, y0, z0 = (2,32,22)
   
