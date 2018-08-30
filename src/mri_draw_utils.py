@@ -383,6 +383,85 @@ def draw_original_vs_reconstructed_rim_z_score(x_true_img, x_hat_img, x_miss_img
 
     save_fig_png(fig_id) 
     
+def draw_original_vs_reconstructed_rim_z_score_str(x_true_img, x_hat_img, x_miss_img, plot_title, relative_error, observed_ratio, tcs, tcs_z_score, z_score, roi_volume, coord=None, coord_tuple = None, folder=None, iteration=-1, time=-1):
+        
+    fig = plt.figure(frameon = False, figsize=(10,10))
+    fig.set_size_inches(7, 7)
+    
+    #fig = plt.figure(frameon = False, figsize=(10,10))
+    #fig.set_size_inches(7, 7)
+    grid_rows = 3
+    grid_cols = 1
+    
+    fg_color = 'white'
+    bg_color = 'black'
+    
+    if plot_title:
+        fig.suptitle(plot_title, color=fg_color, fontweight='normal', fontsize=10)
+    
+    if not coord:
+        coord = find_xyz_cut_coords(x_true_img)
+        
+    grid = gridspec.GridSpec(grid_rows,grid_cols, hspace=0.2, wspace=0.2)
+    
+    subtitle = 'Original fMRI brain volume in three projections.'
+    
+    if time >-1: 
+        subtitle = 'Original fMRI brain volume in three projections. Timepoint: ' + str(time + 1)
+        
+    main_ax = fig.add_subplot(grid[0, 0])
+    main_ax.set_facecolor("blue")    
+   
+    main_ax.set_title(subtitle , color=fg_color, fontweight='normal', fontsize=8)  
+    main_ax.set_aspect('equal')
+      
+   
+    missing_ratio = (1.0 - observed_ratio)
+    missing_ratio_str = formatted_percentage(missing_ratio, 2)
+    print ("Missing Ratio Str:" + missing_ratio_str)                          
+ 
+    relative_error_str = "{0:.5f}".format(relative_error) 
+    relative_error_str = mf.format_number(relative_error, fmt='%1.2e')
+    
+    tsc_str = mf.format_number(tcs, fmt='%1.2e')
+    tsc_z_score_str = mf.format_number(tcs_z_score, fmt='%1.2e')
+    z_score_str = str(z_score)
+                
+    roi_volume_str = '{:d}'.format(roi_volume)
+    
+    true_image = plotting.plot_epi(x_true_img, annotate=False, draw_cross=False, bg_img=None,black_bg=True, figure= fig, axes = main_ax, cmap='jet', cut_coords=coord)     
+    
+    miss_ax = fig.add_subplot(grid[1, 0], sharex=main_ax)
+    miss_ax.set_xlabel('(b)', color=bg_color)
+    
+    miss_ax.set_title('Corrupted fMRI brain volume. ' + " " + str("Missing Timepoints Ratio: ")
+                       + str(missing_ratio_str) + " ROI Volume: " + str(roi_volume_str), color=fg_color, fontweight='normal', fontsize=8)
+    
+    miss_image = plotting.plot_epi(x_miss_img, annotate=True, draw_cross=False, bg_img=None,black_bg=True, figure= fig, axes = miss_ax, cmap='jet', cut_coords=coord)  
+    #miss_image.add_contours(x_miss_img, levels=[0.1, 0.15, 0.17, 0.2], alpha=0.7, colors='r')
+    
+    recov_ax = fig.add_subplot(grid[2, 0], sharex=main_ax)
+    recov_ax.set_xlabel('(c)', color=bg_color)
+    
+    recov_ax.set_title('Completed. ' + " " + str("TCS: ") + tsc_str + " TCS(Z_Score >" + z_score_str + "): "  + tsc_z_score_str, color=fg_color, fontweight='normal', fontsize=8)
+    
+    recovered_image = plotting.plot_epi(x_hat_img, annotate=False, draw_cross=False, bg_img=None,black_bg=True, figure= fig, axes = recov_ax, cmap='jet', cut_coords=coord)       
+    
+    if folder:
+        fig_id =  str(folder) + "/" + "missing_ratio_" + str(missing_ratio_str)
+    else:
+        fig_id =  "_missing_ratio_" + str(missing_ratio_str)
+        
+    print ("Iteration: " + str(iteration))
+    if iteration >=0:
+        fig_id = fig_id[:-1] + '_' + str(iteration)
+    else:
+        fig_id = fig_id[:-1]
+        
+    if time >=0:
+        fig_id = fig_id + '_timepoint_' + str(time)  
+
+    save_fig_png(fig_id) 
     
 def draw_original_vs_reconstructed_rim_tex(x_true_img, x_hat_img, x_miss_img, plot_title, relative_error, observed_ratio, coord=None, folder=None):
         

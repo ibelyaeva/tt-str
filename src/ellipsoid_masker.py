@@ -1,26 +1,13 @@
 import nilearn
-
-from medpy.io import load
-from medpy.features.intensity import intensities
 from nilearn import image
 import nibabel as nib
-from medpy.io import header
-from medpy.io import load, save
 import copy
 from nilearn import plotting
 import os
 import numpy as np
-import SimpleITK as sitk
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import random
 from math import ceil
-from nilearn.datasets import MNI152_FILE_PATH
-from sklearn.model_selection import train_test_split
-from nibabel.affines import apply_affine
 from nilearn.image.resampling import coord_transform, get_bounds, get_mask_bounds
-from skimage.draw import ellipsoid
-from nilearn.image import resample_img
 from nilearn.masking import compute_background_mask
 import metric_util as mu
 import mri_draw_utils as mrd

@@ -80,8 +80,11 @@ class RiemannianTensorCompletionStructural(object):
         
         self.logger.info(self.scan_mr_iteration_folder)
         self.logger.info(self.suffix)
+        self.get_draw_timepoints()
                   
     def init_variables(self):
+        
+        tf.reset_default_graph()
         
         self.title = str(self.d) + "D fMRI Tensor Completion"
         
@@ -331,6 +334,11 @@ class RiemannianTensorCompletionStructural(object):
         self.init_gradient_computation()
         self.define_train_operations()
             
+        config = tf.ConfigProto()
+        config.intra_op_parallelism_threads = 8
+        config.inter_op_parallelism_threads = 8
+        tf.Session(config=config)
+        
         self.sess = tf.Session()
         self.sess.run(tf.global_variables_initializer())
             
@@ -361,12 +369,13 @@ class RiemannianTensorCompletionStructural(object):
         self.logger.info("rse cost 0:" + str( rse_cost))
         
         self.save_solution_scans_iteration(self.suffix, self.scan_mr_iteration_folder, 0)
+        self.save_cost_history()
         
         i = 0
         cost_nan = False
         self.logger.info("Epsilon: " + str(self.epsilon))
-        while gradnorm_val > self.epsilon: 
-        #for k in range(2):
+        #while gradnorm_val > self.epsilon: 
+        for k in range(3):
             i = i + 1
             F_v, gradnorm_val, alpha_val, theta_val, beta_val, cost_new_val, cost_val, tsc_score_val, eta_norm_val, inprod_grad_eta_val, riemannian_grad_norm_val, _, _, _, _, _, _ = self.sess.run([self.loss, self.gradnorm_omega, self.alpha,
                            self.theta, self.beta, self.cost_new, self.cost,
@@ -497,6 +506,8 @@ class RiemannianTensorCompletionStructural(object):
             self.logger.info("Train Cost : " + str(self.train_cost_history[i]) + "; Iteration #: " + str(i))
             
             self.save_solution_scans_iteration(self.suffix, self.scan_mr_iteration_folder, i)
+            self.logger.info("Len TSC Score History: " + str(len(self.tcs_cost_history)))
+            self.save_cost_history()
             
             
             if i > 1:
@@ -541,105 +552,13 @@ class RiemannianTensorCompletionStructural(object):
         self.logger.info("Observed Ratio: " + str(self.observed_ratio))
         self.logger.info("Final TCS Z-Score: " + str(self.tcs_z_score))
         self.logger.info("Final TCS Score: " + str(self.tsc_score))
-
-        
-        output_cost = OrderedDict()
-        indices = []
-
-        cost_arr = []
-        tsc_arr = []
-        tsc_z_score_arr = []
-        
-        rse_arr = []
-
-        counter = 0
-        for item in  self.cost_history:
-            cost_arr.append(item)
-            indices.append(counter)
-            counter = counter + 1
-    
-        output_cost['k'] = indices
-        output_cost['cost'] = cost_arr
-    
-        output_df = pd.DataFrame(output_cost, index=indices)
-
-        results_folder = self.meta.results_folder
-        
-        fig_id = 'solution_cost' + '_' + self.suffix
-        mrd.save_csv_by_path(output_df, results_folder, fig_id)  
-
-        tsc_score_output = OrderedDict()
-        tsc_score_indices = []
-
-        counter = 0
-        for item in self.tcs_cost_history:
-            tsc_arr.append(item)
-            tsc_score_indices.append(counter)
-            counter = counter + 1
-
-        tsc_score_output['k'] = tsc_score_indices
-        tsc_score_output['tsc_cost'] = tsc_arr
-    
-        output_tsc_df = pd.DataFrame(tsc_score_output, index=tsc_score_indices)
-        fig_id = 'tsc_cost' + '_' + self.suffix
-        mrd.save_csv_by_path(output_tsc_df, results_folder, fig_id) 
-        
-        # output z-score
-        tsc_z_score_output = OrderedDict()
-        tsc_z_score_indices = []
-        
-        counter = 0
-        for item in self.tcs_z_scored_history:
-            tsc_z_score_arr.append(item)
-            tsc_z_score_indices.append(counter)
-            counter = counter + 1
-
-        tsc_z_score_output['k'] = tsc_z_score_indices
-        tsc_z_score_output['tsc_z_cost'] = tsc_z_score_arr
-        
-        output_tsc_z_df = pd.DataFrame( tsc_z_score_output, index=tsc_z_score_indices)
-        fig_id = 'tsc_z_cost' + '_' + self.suffix
-        mrd.save_csv_by_path(output_tsc_z_df, results_folder, fig_id) 
-        
-        # output rse history
-        
-        rse_output = OrderedDict()
-        rse_indices = []
-        counter = 0
-        
-        for item in self.rse_cost_history:
-            rse_arr.append(item)
-            rse_indices.append(counter)
-            counter = counter + 1
-
-        rse_output['k'] = rse_indices
-        rse_output['rse_cost'] = rse_arr
-        
-        output_rse_df = pd.DataFrame( rse_output, index=rse_indices)
-        fig_id = 'rse_cost' + '_' + self.suffix
-        mrd.save_csv_by_path(output_rse_df, results_folder, fig_id) 
-        
-        # output train history
-        train_arr = []
-        train_output = OrderedDict()
-        train_indices = []
-        counter = 0
-        
-        for item in self.train_cost_history:
-            train_arr.append(item)
-            train_indices.append(counter)
-            counter = counter + 1
-
-        train_output['k'] = train_indices
-        train_output['train_cost'] = train_arr
-        
-        output_train_df = pd.DataFrame(train_output, index=train_indices)
-        fig_id = 'train_cost' + '_' + self.suffix
-        mrd.save_csv_by_path(output_train_df, results_folder, fig_id) 
-        
         
         # save final solution scans
         self.save_solution_scans(self.suffix, self.scan_mr_folder)
+        self.save_cost_history()
+        
+        self.logger.info("Done ...")
+        print("Done ...")
         
         
     def save_solution_scans(self, suffix, folder): 
@@ -657,18 +576,29 @@ class RiemannianTensorCompletionStructural(object):
             
         self.logger.info("x_true_path: " + str(x_true_path))
         nib.save(self.ground_truth_img, x_true_path)
+        
+        self.effective_roi_volume = self.ellipsoid_mask.effective_roi_volume
 
-        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 0), image.index_img(self.x_hat_img,0), image.index_img(self.x_miss_img, 0), self.title,
-                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, coord=None, folder=self.images_folder, iteration = -1, time=0)
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
+                        image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title,
+                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
+                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=-1, time=self.first_ts)
         
-        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 69), image.index_img(self.x_hat_img,69), image.index_img(self.x_miss_img, 69), self.title,
-                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, coord=None, folder=self.images_folder, iteration = -1, time=69)
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),
+                        image.index_img(self.x_hat_img,self.middle_ts1), image.index_img(self.x_miss_img, self.middle_ts1), self.title,
+                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
+                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=-1, time=self.middle_ts1)
         
-        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 119), image.index_img(self.x_hat_img,119), image.index_img(self.x_miss_img, 119), self.title,
-                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, coord=None, folder=self.images_folder, iteration = -1, time = 119)
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts2),
+                        image.index_img(self.x_hat_img,self.middle_ts2), image.index_img(self.x_miss_img, self.middle_ts2), self.title,
+                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
+                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=-1, time=self.middle_ts2)
         
-        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 143), image.index_img(self.x_hat_img,143), image.index_img(self.x_miss_img, 143), self.title,
-                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, coord=None, folder=self.images_folder, iteration = -1, time=143)
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.max_ts),
+                        image.index_img(self.x_hat_img,self.max_ts), image.index_img(self.x_miss_img, self.max_ts), self.title,
+                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
+                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=-1, time=self.max_ts)
+        
         
     def save_solution_scans_iteration(self, suffix, folder, iteration): 
         
@@ -689,12 +619,215 @@ class RiemannianTensorCompletionStructural(object):
             
         self.logger.info("x_true_path: " + str(x_true_path))
         nib.save(self.ground_truth_img, x_true_path)
+        
+        self.coords = [self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, self.ellipsoid_mask.z0]
+        self.coords_tuple = [(self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, self.ellipsoid_mask.z0)]
+        
+        self.effective_roi_volume = self.ellipsoid_mask.effective_roi_volume
             
-        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 0), image.index_img(self.x_hat_img,0), image.index_img(self.x_miss_img, 0), self.title + " Iteration: " + str(iteration),
-                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, coord=None, folder=self.images_mr_folder_iteration, iteration=iteration)
-            
+        # first ts
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
+                        image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title + " Iteration: " + str(iteration),
+                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.first_ts)
+        
+        # second ts
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),
+                        image.index_img(self.x_hat_img,self.middle_ts1), image.index_img(self.x_miss_img, self.middle_ts1), self.title + " Iteration: " + str(iteration),
+                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.middle_ts1)
+        
+        # third ts
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts2),
+                        image.index_img(self.x_hat_img,self.middle_ts2), image.index_img(self.x_miss_img, self.middle_ts2), self.title + " Iteration: " + str(iteration),
+                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.middle_ts2)
+        
+        # fourth ts
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.max_ts),
+                        image.index_img(self.x_hat_img,self.max_ts), image.index_img(self.x_miss_img, self.max_ts), self.title + " Iteration: " + str(iteration),
+                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.max_ts)
         
     
+            
+        
+    def save_cost_history(self):
+        
+        output_cost = OrderedDict()
+        indices = []
+        mr_cost = []
+        ts_count_cost = []
+        el_volume_cost = []
+        roi_volume_cost = []
+
+        cost_arr = []
+        tsc_arr = []
+        tsc_z_score_arr = []
+        
+        rse_arr = []
+
+        counter = 0
+        for item in  self.cost_history:
+            cost_arr.append(item)
+            indices.append(counter)
+            mr_cost.append(self.missing_ratio)
+            ts_count_cost.append(self.ellipsoid_mask.ts_count)
+            el_volume_cost.append(self.ellipsoid_mask.el_volume)
+            roi_volume_cost.append(self.effective_roi_volume)
+            counter = counter + 1
+    
+        output_cost['k'] = indices
+        output_cost['mr'] = mr_cost
+        output_cost['ts_count'] = ts_count_cost
+        output_cost['el_volume'] = el_volume_cost
+        output_cost['roi_volume'] = roi_volume_cost     
+        output_cost['cost'] = cost_arr
+    
+        output_df = pd.DataFrame(output_cost, index=indices)
+
+        results_folder = self.meta.results_folder
+        
+        fig_id = 'solution_cost' + '_' + self.suffix
+        mrd.save_csv_by_path(output_df, results_folder, fig_id)  
+
+        tsc_score_output = OrderedDict()
+        tsc_score_indices = []
+
+        mr_tcs = []
+        ts_count_tcs = []
+        el_volume_tcs = []
+        roi_volume_tcs = []
+        
+        counter = 0
+        for item in self.tcs_cost_history:
+            tsc_arr.append(item)
+            tsc_score_indices.append(counter)
+            mr_tcs.append(self.missing_ratio)
+            ts_count_tcs.append(self.ellipsoid_mask.ts_count)
+            el_volume_tcs.append(self.ellipsoid_mask.el_volume)
+            roi_volume_tcs.append(self.effective_roi_volume)
+            counter = counter + 1
+
+        tsc_score_output['k'] = tsc_score_indices
+        tsc_score_output['mr'] = mr_tcs
+        tsc_score_output['ts_count'] = ts_count_tcs
+        tsc_score_output['el_volume'] = el_volume_tcs
+        tsc_score_output['roi_volume'] = roi_volume_tcs  
+        tsc_score_output['tsc_cost'] = tsc_arr
+    
+        output_tsc_df = pd.DataFrame(tsc_score_output, index=tsc_score_indices)
+        fig_id = 'tsc_cost' + '_' + self.suffix
+        mrd.save_csv_by_path(output_tsc_df, results_folder, fig_id) 
+        
+        # output z-score
+        tsc_z_score_output = OrderedDict()
+        tsc_z_score_indices = []
+        
+        mr_tcs_z = []
+        ts_count_tcs_z = []
+        el_volume_tcs_z = []
+        roi_volume_tcs_z = []
+        
+        counter = 0
+        for item in self.tcs_z_scored_history:
+            tsc_z_score_arr.append(item)
+            tsc_z_score_indices.append(counter)
+            mr_tcs_z.append(self.missing_ratio)
+            ts_count_tcs_z.append(self.ellipsoid_mask.ts_count)
+            el_volume_tcs_z.append(self.ellipsoid_mask.el_volume)
+            roi_volume_tcs_z.append(self.effective_roi_volume)
+            counter = counter + 1
+
+        tsc_z_score_output['k'] = tsc_z_score_indices
+        tsc_z_score_output['mr'] =  mr_tcs_z
+        tsc_z_score_output['ts_count'] = ts_count_tcs_z
+        tsc_z_score_output['el_volume'] = el_volume_tcs_z
+        tsc_z_score_output['roi_volume'] = roi_volume_tcs_z  
+        tsc_z_score_output['tsc_z_cost'] = tsc_z_score_arr
+        
+        output_tsc_z_df = pd.DataFrame( tsc_z_score_output, index=tsc_z_score_indices)
+        fig_id = 'tsc_z_cost' + '_' + self.suffix
+        mrd.save_csv_by_path(output_tsc_z_df, results_folder, fig_id) 
+        
+        # output rse history
+        
+        rse_output = OrderedDict()
+        rse_indices = []
+        
+        mr_tcs_rse = []
+        ts_count_tcs_rse = []
+        el_volume_tcs_rse = []
+        roi_volume_tcs_rse = []    
+        
+        counter = 0
+        
+        for item in self.rse_cost_history:
+            rse_arr.append(item)
+            rse_indices.append(counter)
+            mr_tcs_rse.append(self.missing_ratio)
+            ts_count_tcs_rse.append(self.ellipsoid_mask.ts_count)
+            el_volume_tcs_rse.append(self.ellipsoid_mask.el_volume)
+            roi_volume_tcs_rse.append(self.effective_roi_volume)
+            counter = counter + 1
+
+        rse_output['k'] = rse_indices
+        rse_output['mr'] =  mr_tcs_rse
+        rse_output['ts_count'] = ts_count_tcs_rse
+        rse_output['el_volume'] = el_volume_tcs_rse
+        rse_output['roi_volume'] = roi_volume_tcs_rse 
+        rse_output['rse_cost'] = rse_arr
+        
+        output_rse_df = pd.DataFrame( rse_output, index=rse_indices)
+        fig_id = 'rse_cost' + '_' + self.suffix
+        mrd.save_csv_by_path(output_rse_df, results_folder, fig_id) 
+        
+        # output train history
+        train_arr = []
+        train_output = OrderedDict()
+        train_indices = []
+        
+        mr_tcs_train = []
+        ts_count_tcs_train = []
+        el_volume_tcs_train = []
+        roi_volume_tcs_train = []         
+        
+        counter = 0
+        
+        for item in self.train_cost_history:
+            train_arr.append(item)
+            train_indices.append(counter)
+            
+            mr_tcs_train.append(self.missing_ratio)
+            ts_count_tcs_train.append(self.ellipsoid_mask.ts_count)
+            el_volume_tcs_train.append(self.ellipsoid_mask.el_volume)
+            roi_volume_tcs_train.append(self.effective_roi_volume)
+            counter = counter + 1
+
+        train_output['k'] = train_indices
+        train_output['train_cost'] = train_arr
+        train_output['mr'] =  mr_tcs_train
+        train_output['ts_count'] = ts_count_tcs_train
+        train_output['el_volume'] = el_volume_tcs_train
+        train_output['roi_volume'] = roi_volume_tcs_train 
+        train_output['train_cost'] = train_arr
+        
+        output_train_df = pd.DataFrame(train_output, index=train_indices)
+        fig_id = 'train_cost' + '_' + self.suffix
+        mrd.save_csv_by_path(output_train_df, results_folder, fig_id) 
+        
+    
+    def get_draw_timepoints(self):
+        self.first_ts = 0
+        self.middle_ts1 = 5
+        self.middle_ts2 = int(self.ellipsoid_mask.ts_count/2.0)
+        self.max_ts = self.ellipsoid_mask.ts_count - 1 
+        
+        self.logger.info("1st TS: " + str(self.first_ts) + "; 2nd TS: " + str(self.middle_ts1)  +
+                     "; 3rd TS: " + str(self.middle_ts2)  + "Max TS: " + str(self.max_ts))
+        
+        return self.first_ts, self.middle_ts1, self.middle_ts2, self.max_ts
+        
         
 
         

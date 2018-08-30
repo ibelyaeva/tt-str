@@ -1,29 +1,12 @@
 import tensorflow as tf
 import numpy as np
-import t3f
-from sklearn.tree.tests.test_tree import y_random
+
 tf.set_random_seed(0)
 np.random.seed(0)
-import matplotlib.pyplot as plt
 import metric_util as mt
-import data_util as du
-from t3f import shapes
 from nilearn import image
-from skimage.measure import compare_ssim as ssim
-from tensorflow.python.util import nest
 import copy
-from nilearn import plotting
-from t3f import ops
 import mri_draw_utils as mrd
-from t3f import initializers
-from t3f import approximate
-from scipy import optimize 
-from nilearn.masking import compute_background_mask
-from nilearn.masking import compute_epi_mask
-from collections import OrderedDict
-import pandas as pd
-from scipy import stats
-from nilearn.image import math_img
 import time
 import tensor_util as tu
 import rimannian_tensor_completion_structural as rtc
@@ -93,8 +76,8 @@ class TensorCompletionStructural(object):
         self.sparse_observation = tu.create_sparse_observation(self.ground_truth, self.mask_indices)
         self.norm_sparse_observation = np.linalg.norm(self.sparse_observation)
         
-        self.epsilon = 1e-6
-        self.train_epsilon = 1e-5
+        self.epsilon = 1e-5
+        self.train_epsilon = 1e-4
         self.backtrack_const = 1e-4
         
         # related z_score structures
@@ -110,16 +93,15 @@ class TensorCompletionStructural(object):
         self.ellipsoid_mask = self.create_ellipse()
         self.mask_indices = tu.get_mask_with_epi(self.x_true_data, self.x_true_img, self.observed_ratio, self.d)
         
-        self.frames_count = int(self.missing_ratio*(self.x_true_data.shape[len(self.x_true_data.shape)-1])/100.0)
-        self.frames_count = 10
-        self.logger.info("Missing Frames Count: " + str(self.frames_count))
+        self.logger.info("Missing Frames Count: " + str(self.time_point_count))
         
         self.x_mask_img = stp.generate_structural_missing_pattern(self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, 
                                                                   self.ellipsoid_mask.z0, self.ellipsoid_mask.x_r, 
                                                                   self.ellipsoid_mask.y_r, self.ellipsoid_mask.z_r,
-                                                                             self.frames_count, self.ellipsoid_mask.mask_path)
+                                                                             self.time_point_count, self.ellipsoid_mask.mask_path)
         
         coords = [self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, self.ellipsoid_mask.z0]
+        coords_tuple = [(self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, self.ellipsoid_mask.z0)]
         
         self.x_mask_img_data = np.array(self.x_mask_img.get_data())
         mask_zero_indices_count = np.count_nonzero(self.x_mask_img_data==0)
@@ -130,17 +112,23 @@ class TensorCompletionStructural(object):
         
         mask_zero_indices_count2 = np.count_nonzero(self.mask_indices==0)
         self.logger.info("Zero Count 2: " + str(mask_zero_indices_count2))
-                                                            
-        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.x_true_img, 0), image.index_img(self.x_mask_img,0), 
-                    image.index_img(self.x_mask_img, 0), "TEST 4D STR",
-                    0, self.observed_ratio, 0, 0, 2, coord=coords, folder=self.meta.images_folder, iteration = -1, time=0)
         
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.x_true_img, 0), image.index_img(self.x_mask_img,0), 
+                    image.index_img(self.x_mask_img, 0), "TEST 4D STR",
+                    0, self.observed_ratio, 0, 0, 2, self.effective_roi_volume, coord=coords, coord_tuple = coords_tuple, folder=self.meta.images_folder, iteration = -1, time=0)
                                                                              
         return self.mask_indices
     
     def create_ellipse(self):
         self.ellipsoid_mask  = elp.EllipsoidMask(self.x0, self.y0, self.z0, self.x_r, self.y_r, self.z_r, self.meta.ellipsoid_folder)
+        self.effective_roi_volume = self.ellipsoid_mask.compute_effective_roi_volume(self.missing_ratio, self.get_timepoint_count())
+        self.logger.info("Effective ROI Volume: " + str(self.effective_roi_volume))
         return self.ellipsoid_mask
+    
+    def get_timepoint_count(self):
+        self.time_point_count = int(self.missing_ratio*144)
+        self.logger.info("Time Point Count: " + str(self.time_point_count))
+        return self.time_point_count
     
         
     def init_cost_history(self):

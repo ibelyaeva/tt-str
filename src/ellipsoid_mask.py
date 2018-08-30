@@ -38,5 +38,13 @@ class EllipsoidMask(object):
         print("Ellipsoid :" + "; x_r =" + str(self.x_r) + "; y_r=" + str(self.y_r) + "; z_r = " + str(self.z_r) + "; Volume =" + str(self.volume) + "; Observed Ratio: " + str(result))
         return result
         
+    def compute_effective_roi_volume(self, mr, time_point_count):
+        self.ts_count = time_point_count
+        self.mr = mr
+        self.el_volume = self.volume()
+        print("Ellipsoid Volume:" + str(self.el_volume))
+        self.effective_roi_volume = int(self.volume()*time_point_count)
+        return self.effective_roi_volume
+        
         
     
