@@ -37,7 +37,7 @@ class RiemannianTensorCompletionStructural(object):
                  sparse_observation_org,
                  norm_sparse_observation,
                  x_init_tcs,
-                 ten_ones, max_tt_rank, observed_ratio, epsilon, train_epsilon, backtrack_const, logger, meta, d, ellipsoid_mask, z_score = 2):
+                 ten_ones, max_tt_rank, observed_ratio, epsilon, train_epsilon, backtrack_const, logger, meta, d, ellipsoid_mask, random_ts, z_score = 2):
         
         self.ground_truth_img = ground_truth_img
         self.ground_truth = ground_truth
@@ -57,6 +57,7 @@ class RiemannianTensorCompletionStructural(object):
         self.d = d
         self.z_score = z_score
         self.ellipsoid_mask = ellipsoid_mask
+        self.random_ts = random_ts
                  
         self.epsilon = epsilon
         self.train_epsilon = train_epsilon
@@ -817,10 +818,10 @@ class RiemannianTensorCompletionStructural(object):
         
     
     def get_draw_timepoints(self):
-        self.first_ts = 0
-        self.middle_ts1 = 5
-        self.middle_ts2 = int(self.ellipsoid_mask.ts_count/2.0)
-        self.max_ts = self.ellipsoid_mask.ts_count - 1 
+        self.first_ts = self.random_ts[0]
+        self.middle_ts1 = self.random_ts[1] 
+        self.middle_ts2 = self.random_ts[int(len(self.random_ts)/2.0)]
+        self.max_ts = self.random_ts[len(self.random_ts) - 1]
         
         self.logger.info("1st TS: " + str(self.first_ts) + "; 2nd TS: " + str(self.middle_ts1)  +
                      "; 3rd TS: " + str(self.middle_ts2)  + "Max TS: " + str(self.max_ts))

@@ -95,10 +95,10 @@ class TensorCompletionStructural(object):
         
         self.logger.info("Missing Frames Count: " + str(self.time_point_count))
         
-        self.x_mask_img = stp.generate_structural_missing_pattern(self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, 
+        self.x_mask_img, self.random_ts = stp.generate_structural_missing_pattern_random_frame(self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, 
                                                                   self.ellipsoid_mask.z0, self.ellipsoid_mask.x_r, 
                                                                   self.ellipsoid_mask.y_r, self.ellipsoid_mask.z_r,
-                                                                             self.time_point_count, self.ellipsoid_mask.mask_path)
+                                                                             self.time_point_count, self.ellipsoid_mask.mask_path, self.target_shape)
         
         coords = [self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, self.ellipsoid_mask.z0]
         coords_tuple = [(self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, self.ellipsoid_mask.z0)]
@@ -112,10 +112,6 @@ class TensorCompletionStructural(object):
         
         mask_zero_indices_count2 = np.count_nonzero(self.mask_indices==0)
         self.logger.info("Zero Count 2: " + str(mask_zero_indices_count2))
-        
-        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.x_true_img, 0), image.index_img(self.x_mask_img,0), 
-                    image.index_img(self.x_mask_img, 0), "TEST 4D STR",
-                    0, self.observed_ratio, 0, 0, 2, self.effective_roi_volume, coord=coords, coord_tuple = coords_tuple, folder=self.meta.images_folder, iteration = -1, time=0)
                                                                              
         return self.mask_indices
     
@@ -183,7 +179,7 @@ class TensorCompletionStructural(object):
                                                     self.observed_ratio,
                                                     self.epsilon, self.train_epsilon,
                                                     self.backtrack_const, self.logger, 
-                                                    self.meta, self.d, self.ellipsoid_mask, self.z_score,
+                                                    self.meta, self.d, self.ellipsoid_mask, self.z_score
                                                     )
         self.rtc_runner.complete()
         
@@ -210,7 +206,7 @@ class TensorCompletionStructural(object):
                                                     self.epsilon, self.train_epsilon,
                                                     self.backtrack_const, self.logger, self.meta, self.d, 
                                                     self.ellipsoid_mask,
-                                                    self.z_score,
+                                                    self.z_score
                                                     )
         self.rtc_runner.complete()
         
@@ -237,7 +233,8 @@ class TensorCompletionStructural(object):
                                                     self.epsilon, self.train_epsilon,
                                                     self.backtrack_const, self.logger, self.meta, self.d, 
                                                     self.ellipsoid_mask,
-                                                    self.z_score,
+                                                    self.random_ts,
+                                                    self.z_score
                                                     )
         self.rtc_runner.complete()
         
