@@ -6,6 +6,8 @@ from nilearn import image
 from scipy import stats
 import copy
 from math import isnan
+from statsmodels.robust.scale import mad
+from mpmath import mpf, mpc, mp
 
 
 def get_max_rank(x):
@@ -98,6 +100,16 @@ def get_z_scored_mask(x_img, z_score_cut_off):
     mask_z_score_indices = (abs(ground_truth_z_score) > z_score_cut_off).astype('int') 
     print ("Z-score indices count: " + str(get_mask_z_indices_count(mask_z_score_indices)))
     return mask_z_score_indices
+    
+def get_z_score_robust_mask(x_img, z_score_cut_off):
+    mu = np.median(np.array(x_img.get_data()), axis=3)
+    sigma = np.stack([mad(np.array(x_img.get_data()), axis=3)] * np.array(x_img.get_data()).shape[-1], -1)
+    idxs = np.where(np.abs(sigma) > 1e-10)
+    ground_truth_z_score = np.array(x_img.get_data()) - mu[..., np.newaxis]
+    ground_truth_z_score[idxs] /= sigma[idxs]
+    mask_z_score_indices = (abs(ground_truth_z_score) > z_score_cut_off).astype('int')
+    print ("Z-score indices count: " + str(get_mask_z_indices_count(mask_z_score_indices)))
+    return mask_z_score_indices
 
 def get_mask_z_indices_count(mask_z_score):
     mask_z_indices_count = np.count_nonzero(mask_z_score==1)
@@ -109,9 +121,14 @@ def tsc_z_score(x_hat,x_true, ten_ones, mask, z_score_mask):
     nomin = np.linalg.norm(np.multiply((ten_ones - mask), (x_true_ind -  x_hat_ind)))
     denom = np.linalg.norm(np.multiply((ten_ones - mask), x_true_ind))
     
+    print ("Z Nomin:" + str(mpf(nomin)))
+    print ("Z DeNomin:" + str(mpf(denom)))
+    
+    mp.dps = 50
+    
     score = 0
     try:
-        score = float(nomin)/float(denom)
+        score = mpf(nomin)/mpf(denom)
     except Exception as e:
         score = 0
     except Warning as w:
