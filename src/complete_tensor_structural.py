@@ -216,7 +216,8 @@ class TensorCompletionStructural(object):
     
     def complete4D(self):
         
-        self.z_scored_mask = tu.get_z_scored_mask(self.ground_truth_img, 2)
+        #self.z_scored_mask = tu.get_z_scored_mask(self.ground_truth_img, 2)
+        self.z_scored_mask = tu.get_z_score_robust_mask(self.ground_truth_img, 2)
         self.logger.info("Z-score Mask Indices Count: " + str(tu.get_mask_z_indices_count(self.z_scored_mask)))
 
         self.rtc_runner = rtc.RiemannianTensorCompletionStructural(self.ground_truth_img,
