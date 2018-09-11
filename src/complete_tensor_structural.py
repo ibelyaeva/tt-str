@@ -76,8 +76,8 @@ class TensorCompletionStructural(object):
         self.sparse_observation = tu.create_sparse_observation(self.ground_truth, self.mask_indices)
         self.norm_sparse_observation = np.linalg.norm(self.sparse_observation)
         
-        self.epsilon = 1e-5
-        self.train_epsilon = 1e-4
+        self.epsilon = 1e-6
+        self.train_epsilon = 1e-5
         self.backtrack_const = 1e-4
         
         # related z_score structures

@@ -10,7 +10,6 @@ import metric_util as mt
 import data_util as du
 from t3f import shapes
 from nilearn import image
-from skimage.measure import compare_ssim as ssim
 from tensorflow.python.util import nest
 import copy
 from nilearn import plotting

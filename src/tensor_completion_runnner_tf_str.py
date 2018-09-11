@@ -9,7 +9,7 @@ import complete_tensor_structural as ct
 
 
 config_loc = path.join('config')
-config_filename = 'solution.config'
+config_filename = 'solution-ec2.config'
 config_file = os.path.join(config_loc, config_filename)
 config = configparser.ConfigParser()
 config.read(config_file)
@@ -50,7 +50,7 @@ def complete_random_4Dsize1():
     root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+    observed_ratio_list = [0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
     #observed_ratio_list = [0.95,0.9]
     
     x0, y0, z0 = (2,32,22)
@@ -67,7 +67,7 @@ def complete_random_4Dsize2():
     root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+    observed_ratio_list = [0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
     #observed_ratio_list = [0.95,0.9]
     
     x0, y0, z0 = (2,32,22)
@@ -84,7 +84,7 @@ def complete_random_4Dsize3():
     root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+    observed_ratio_list = [0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
     
     x0, y0, z0 = (2,32,22)
   

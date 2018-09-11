@@ -1,32 +1,25 @@
 import nilearn
 
-from medpy.io import load
-from medpy.features.intensity import intensities
 from nilearn import image
 import nibabel as nib
-from medpy.io import header
-from medpy.io import load, save
 import copy
 from nilearn import plotting
 import os
 import numpy as np
-import SimpleITK as sitk
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import random
 from math import ceil
 from nilearn.datasets import MNI152_FILE_PATH
-from sklearn.model_selection import train_test_split
 from nibabel.affines import apply_affine
 from nilearn.image.resampling import coord_transform, get_bounds, get_mask_bounds
-from skimage.draw import ellipsoid
 from nilearn.image import resample_img
 from nilearn.masking import compute_background_mask
 import ellipsoid_mask as elm
 import metric_util as mt
 
 
-folder_path_subject1 = "/work/pl/sch/analysis/data/COBRE001"
+folder_path_subject1 = "/home/ec2-user/analysis/data/subject1"
 data_path_subject1   = "swaAMAYER+cobre01_63001+M87100944+20110309at135133+RSTpre_V01_R01+CM.nii"
 
 ellipsoid_masks_folder = "/work/pl/sch/analysis/results/masked_images/ellipsoid_masks"
@@ -35,7 +28,7 @@ ellipsoid_mask2_path = "size_20_11_25.nii"
 ellipsoid_mask3_path = "size_35_20_25.nii"
 
 def get_folder_subject1():
-    folder_path_subject1 = "/work/pl/sch/analysis/data/COBRE001"
+    folder_path_subject1 = "/home/ec2-user/analysis/data/subject1"
     return folder_path_subject1
 
 def corrupted4D_10_frames_path():

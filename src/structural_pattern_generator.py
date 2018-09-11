@@ -14,7 +14,6 @@ from nilearn.datasets import MNI152_FILE_PATH
 from sklearn.model_selection import train_test_split
 from nibabel.affines import apply_affine
 from nilearn.image.resampling import coord_transform, get_bounds, get_mask_bounds
-from skimage.draw import ellipsoid
 from nilearn.image import resample_img
 from nilearn.masking import compute_background_mask
 import metric_util as mt

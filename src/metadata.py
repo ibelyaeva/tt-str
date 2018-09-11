@@ -12,7 +12,7 @@ class Metadata(object):
     
     def __init__(self, pattern, n):
         config_loc = path.join('config')
-        config_filename = 'solution.config'
+        config_filename = 'solution-ec2.config'
         config_file = os.path.join(config_loc, config_filename)
         config = configparser.ConfigParser()
         config.read(config_file)
