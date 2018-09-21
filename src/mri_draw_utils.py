@@ -9,10 +9,20 @@ from math import ceil
 import matplotlib.gridspec as gridspec
 import matplotlib
 from nilearn.plotting import find_xyz_cut_coords
+from matplotlib.cm import get_cmap
 
 import metric_util as mc
 import math
 import math_format as mf
+import numpy as np
+import tensor_util as tu
+
+import spike_detection as sp
+import metric_util as mt
+import data_util as du
+
+from matplotlib.offsetbox import (TextArea, DrawingArea, OffsetImage,
+                                  AnnotationBbox)
 
 PROJECT_DIR  = "/work/pl/sch/analysis/scripts"
 PROJECT_ROOT_DIR = "."
@@ -56,7 +66,7 @@ def save_report_fig(fig_id, tight_layout=True):
 def save_fig_abs_path(fig_id, tight_layout=True):
     path = os.path.join(fig_id + ".png")
     print("Saving figure", path)
-    plt.savefig(path, format='png', facecolor='k', edgecolor='k', dpi=300)
+    plt.savefig(path, format='png', facecolor='k', edgecolor='k', dpi=300, bbox_inches='tight')
         
 def save_csv(df, dataset_id):
     path = os.path.join(PROJECT_DIR, CSV_DATA, dataset_id + ".csv")
@@ -429,7 +439,7 @@ def draw_original_vs_reconstructed_rim_z_score_str(x_true_img, x_hat_img, x_miss
                 
     roi_volume_str = '{:d}'.format(roi_volume)
     
-    true_image = plotting.plot_epi(x_true_img, annotate=False, draw_cross=False, bg_img=None,black_bg=True, figure= fig, axes = main_ax, cmap='jet', cut_coords=coord)     
+    true_image = plotting.plot_epi(x_true_img, annotate=True, draw_cross=False, bg_img=None,black_bg=True, figure= fig, axes = main_ax, cmap='jet', cut_coords=coord)     
     
     miss_ax = fig.add_subplot(grid[1, 0], sharex=main_ax)
     miss_ax.set_xlabel('(b)', color=bg_color)
@@ -445,7 +455,7 @@ def draw_original_vs_reconstructed_rim_z_score_str(x_true_img, x_hat_img, x_miss
     
     recov_ax.set_title('Completed. ' + " " + str("TCS: ") + tsc_str + " TCS(Z_Score >" + z_score_str + "): "  + tsc_z_score_str, color=fg_color, fontweight='normal', fontsize=8)
     
-    recovered_image = plotting.plot_epi(x_hat_img, annotate=False, draw_cross=False, bg_img=None,black_bg=True, figure= fig, axes = recov_ax, cmap='jet', cut_coords=coord)       
+    recovered_image = plotting.plot_epi(x_hat_img, annotate=True, draw_cross=False, bg_img=None,black_bg=True, figure= fig, axes = recov_ax, cmap='jet', cut_coords=coord)       
     
     if folder:
         fig_id =  str(folder) + "/" + "missing_ratio_" + str(missing_ratio_str)
@@ -744,3 +754,230 @@ def draw_original_vs_reconstructed4(x_true_img, x_hat_img, x_miss_img, plot_titl
     else:
         fig_id =  "_missing_ratio_" + str(missing_ratio_str)
     save_fig_abs_path(fig_id)
+    
+    
+#n_spikes, out_spikes, out_fft, spikes_list = slice_wise_fft(subject_scan_path, spike_thres=4.)
+
+def get_spiked_image(in_fft,tr):
+    return image.index_img(in_fft,tr)
+
+def get_spiked_overlay_by_z_score(in_fft,tr, z_score):
+    spike_tr_img = get_spiked_image(in_fft,tr)
+    spike_zscored_overlay_img = tu.get_z_score_robust_spatial_mask(spike_tr_img,z_score) 
+    return spike_zscored_overlay_img
+
+def get_spiked_tr_img_with_overlay(in_fft, tr, z_score, primary):
+    spike_tr_img = get_spiked_image(in_fft,tr)
+    z_score_mask_img = None
+    
+    if not primary: 
+        spike_zscored_overlay = get_spiked_overlay_by_z_score(in_fft,tr, z_score)
+        z_score_mask_img = image.new_img_like(in_fft,spike_zscored_overlay)
+        
+    return spike_tr_img, z_score_mask_img
+
+def get_prev_tr_img_with_overlay(in_fft, tr, z_score, primary):
+      
+    prev_spike_tr_img = None
+    prev_spike_zscored_overlay_img = None
+    
+    if tr > 0:
+        prev_spike_tr_img, prev_spike_zscored_overlay_img = get_spiked_tr_img_with_overlay(in_fft, tr - 1, z_score, primary)
+        
+    return prev_spike_tr_img, prev_spike_zscored_overlay_img
+
+    
+def get_post_tr_img_with_overlay(in_fft, tr, z_score, primary):
+    spike_img = mt.read_image_abs_path(in_fft)  
+    data = np.array(spike_img.get_data())
+    
+    post_spike_tr_img = None
+    post_spike_zscored_overlay_img = None
+    
+    ntpoints = data.shape[-1]
+    if tr < (ntpoints - 1):
+        post_spike_tr_img, post_spike_zscored_overlay_img = get_spiked_tr_img_with_overlay(in_fft, tr + 1, z_score, primary)
+        
+    return post_spike_tr_img, post_spike_zscored_overlay_img
+
+def plot_slice_tern(in_fft, tr, z_score, outer_grid, fig, z, z_score_value, primary = False,
+                  cmap='Greys_r'):
+    
+    inner_grid = gridspec.GridSpecFromSubplotSpec(1, 3,
+            subplot_spec=outer_grid, wspace=0.0, hspace=0.0)
+    
+    main_ax = fig.add_subplot(inner_grid[0, 0])
+    main_ax.set_aspect('equal')
+    
+    fg_color = 'white'
+    bg_color = 'black'
+    
+    title = "TR = " + str(tr) + ", Z slice = " + str(z) + ", Z-score = " + str(z_score_value) + ' $>$' + str( z_score)
+    #main_ax.set_title(title, color=fg_color, loc='center', fontweight='normal', fontsize=8)
+   
+   
+    prev_spike_tr_img, prev_spike_zscored_overlay_img = get_prev_tr_img_with_overlay(in_fft, tr, z_score, primary)
+    
+    if  prev_spike_tr_img is not None:
+        
+        if not primary:
+            prev_spike_img = plotting.plot_img( prev_spike_tr_img, title = title, figure= fig, axes = main_ax, display_mode='z', 
+                                            bg_img=None,black_bg=True, 
+                                            cmap=cmap, cut_coords=[z])
+        else:
+            prev_spike_img = plotting.plot_epi(prev_spike_tr_img, draw_cross=False, title = title, figure= fig, axes = main_ax, display_mode='z', 
+                                            bg_img=None,black_bg=True, 
+                                            cut_coords=[z])
+        
+        if prev_spike_zscored_overlay_img is not None:
+            prev_spike_img.add_contours(prev_spike_zscored_overlay_img, 
+                                    levels=[0.5], filled=True, alpha=0.8, colors='r')
+        
+    curr_tr_ax = fig.add_subplot(inner_grid[0, 1],  sharey=main_ax)
+    
+    curr_tr_spike_tr_img, curr_tr_spike_zscored_overlay_img = get_spiked_tr_img_with_overlay(in_fft, tr, z_score, primary)
+    
+    if not primary:
+        curr_img = plotting.plot_img(curr_tr_spike_tr_img, figure= fig, axes = curr_tr_ax, display_mode='z', 
+                                            bg_img=None,black_bg=True, 
+                                            cmap=cmap, cut_coords=[z])
+    else:
+        curr_img = plotting.plot_epi(curr_tr_spike_tr_img, draw_cross=False, figure= fig, axes = curr_tr_ax, display_mode='z', 
+                                            bg_img=None,black_bg=True, 
+                                           cut_coords=[z])
+    
+    if curr_tr_spike_zscored_overlay_img is not None:
+        curr_img.add_contours(curr_tr_spike_zscored_overlay_img, 
+                                    levels=[0.5], filled=True, alpha=0.8, colors='r')
+    
+    post_tr_ax = fig.add_subplot(inner_grid[0, 2], sharey=main_ax)
+    
+    post_spike_tr_img, post_spike_zscored_overlay_img = get_post_tr_img_with_overlay(in_fft, tr, z_score, primary)
+    
+    if  post_spike_tr_img is not None:
+        
+        if not primary:
+            post_spike_img = plotting.plot_img( post_spike_tr_img, figure= fig, axes = post_tr_ax, display_mode='z', 
+                                            bg_img=None,black_bg=True, 
+                                            cmap=cmap, cut_coords=[z])
+        else:
+            post_spike_img = plotting.plot_epi( post_spike_tr_img, draw_cross=False, figure= fig, axes = post_tr_ax, display_mode='z', 
+                                            bg_img=None,black_bg=True, 
+                                            cut_coords=[z])
+        
+        if post_spike_zscored_overlay_img is not None:
+            post_spike_img.add_contours(post_spike_zscored_overlay_img, 
+                                    levels=[0.5], filled=True, alpha=0.8, colors='r')
+    
+
+def draw_spikes(path_func, plot_title, folder, spike_thre = 4.):
+    n_spikes, out_spikes, out_fft, spikes_list = sp.slice_wise_fft(path_func, folder, spike_thres=spike_thre, out_prefix = 'subject')
+    
+    cols=3
+    
+    fg_color = 'white'
+    bg_color = 'black'
+    
+    if len(spikes_list) > cols * 7:
+        cols += 1
+        
+    nspikes = len(spikes_list)
+    rows = 1
+    if nspikes > cols:
+        rows = math.ceil(nspikes / cols)
+    
+    rows = int(rows)*2
+    cols = int(cols)
+       
+    print rows, cols
+    fig = plt.figure(frameon = False, figsize=(int(7 * cols), int(5 * rows)))
+    
+    if plot_title:
+        fig.suptitle(plot_title, color=bg_color, fontweight='normal', fontsize=8)
+    
+    outer_grid = gridspec.GridSpec(int(rows), int(cols), hspace=0.05, wspace=0.05)
+
+    # row 1
+    #primary
+    (t, z, z_score) = spikes_list[0]
+    subplot_spec = outer_grid[0,0]
+    plot_slice_tern(path_func, t, spike_thre, subplot_spec, fig, z, z_score, primary = True,
+                                    cmap=None)
+    
+    (t, z, z_score) = spikes_list[1]
+    subplot_spec = outer_grid[0,1]
+    plot_slice_tern(path_func, t, spike_thre, subplot_spec, fig, z, z_score, primary = True,
+                                    cmap=None)
+    
+    (t, z, z_score) = spikes_list[2]
+    subplot_spec = outer_grid[0,2]
+    plot_slice_tern(path_func, t, spike_thre, subplot_spec, fig, z, z_score, primary = True,
+                                    cmap=None)
+    
+    # fft
+    (t, z, z_score) = spikes_list[0]
+    subplot_spec = outer_grid[1,0]
+    plot_slice_tern(out_fft, t, spike_thre, subplot_spec, fig, z, z_score, primary = False,
+                                    cmap='Greys_r')
+    (t, z, z_score) = spikes_list[1]
+    subplot_spec = outer_grid[1,1]
+    plot_slice_tern(out_fft, t, spike_thre, subplot_spec, fig, z, z_score, primary = False,
+                                    cmap='Greys_r')
+    
+    (t, z, z_score) = spikes_list[2]
+    subplot_spec = outer_grid[1,2]
+    plot_slice_tern(out_fft, t, spike_thre, subplot_spec, fig, z, z_score, primary = False,
+                                    cmap='Greys_r')
+    
+    #row 2
+    
+    #primary
+    (t, z, z_score) = spikes_list[3]
+    subplot_spec = outer_grid[2,0]
+    plot_slice_tern(path_func, t, spike_thre, subplot_spec, fig, z, z_score, primary = True,
+                                    cmap=None)
+    
+    (t, z, z_score) = spikes_list[4]
+    subplot_spec = outer_grid[2,1]
+    plot_slice_tern(path_func, t, spike_thre, subplot_spec, fig, z, z_score, primary = True,
+                                     cmap=None)
+    
+    (t, z, z_score) = spikes_list[5]
+    subplot_spec = outer_grid[2,2]
+    plot_slice_tern(path_func, t, spike_thre, subplot_spec, fig, z, z_score, primary = True,
+                                     cmap=None)
+    
+    # fft
+    (t, z, z_score) = spikes_list[3]
+    subplot_spec = outer_grid[3,0]
+    plot_slice_tern(out_fft, t, spike_thre, subplot_spec, fig, z, z_score, primary = False,
+                                    cmap='Greys_r')
+    (t, z, z_score) = spikes_list[4]
+    subplot_spec = outer_grid[3,1]
+    plot_slice_tern(out_fft, t, spike_thre, subplot_spec, fig, z, z_score, primary = False,
+                                    cmap='Greys_r')
+    
+    (t, z, z_score) = spikes_list[5]
+    subplot_spec = outer_grid[3,2]
+    plot_slice_tern(out_fft, t, spike_thre, subplot_spec, fig, z, z_score, primary = False,
+                                    cmap='Greys_r')
+    
+    fig.text(0.5, 0.95, plot_title, color = fg_color, fontsize = 18, ha='center', va='center')
+    
+    if folder:
+        fig_id =  os.path.join(folder, "fMRI_fft_spike_detection_z_score_" + str(spike_thre))
+        save_fig_abs_path(fig_id)
+
+#
+#if __name__ == "__main__":
+#    pass
+#    subject_scan_path = du.get_full_path_subject1()
+#    title = "Slise-wise 4D fMRI Spikes in a Fourier Space at the extremes above Z-Score " + '$ >$' + str(4)      
+#    draw_spikes(subject_scan_path, title, "/work/str/fft", spike_thre = 4.)
+                     
+
+        
+        
+    
+
+    

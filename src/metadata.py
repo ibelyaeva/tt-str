@@ -69,8 +69,10 @@ class Metadata(object):
         self.images_folder_iteration_dir = path.join(self.images_folder, 'mr')
         self.scan_images_iteration_folder = fs.create_batch_directory(self.images_folder_iteration_dir, suffix, False)
         self.images_folder_mr_final_dir = fs.create_batch_directory(self.scan_images_iteration_folder,'final', False)
+        self.images_metadata_folder = fs.create_batch_directory(self.scan_images_iteration_folder, 'metadata', False)
         self.logger.info("Created MR Images Iteration [%s] Folder at: [%s]" ,suffix, self.scan_images_iteration_folder)
         self.logger.info("Created MR Images Final Iteration [%s] Folder at: [%s]" ,suffix, self.images_folder_mr_final_dir)
+        self.logger.info("Created MR Images Metadata [%s] Folder at: [%s]" ,suffix, self.images_metadata_folder)
         return self.scan_images_iteration_folder
         
     

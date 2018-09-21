@@ -26,6 +26,7 @@ import random
 import itertools
 from random import seed
 from random import sample
+np.random.seed(0)
 
 def generate_structural_missing_pattern(x0,y0,z0, x_r, y_r, z_r,frames_count, folder):
     subject_scan_path = du.get_full_path_subject1()
