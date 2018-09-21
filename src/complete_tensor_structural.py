@@ -48,7 +48,7 @@ class TensorCompletionStructural(object):
         
         self.tensor_shape = tu.get_tensor_shape(self.x_true_data)
         self.max_tt_rank = tu.get_max_rank(self.x_true_reshaped_rank)
-        #self.max_tt_rank = 46
+        self.max_tt_rank = 87
         
         self.logger.info("Tensor Shape: " + str(self.tensor_shape) + "; Max Rank: " + str(self.max_tt_rank))
              
@@ -77,7 +77,7 @@ class TensorCompletionStructural(object):
         self.norm_sparse_observation = np.linalg.norm(self.sparse_observation)
         
         self.epsilon = 1e-8
-        self.train_epsilon = 1e-7
+        self.train_epsilon = 1e-8
         self.backtrack_const = 1e-4
         
         # related z_score structures
