@@ -81,6 +81,7 @@ class RiemannianTensorCompletionStructural(object):
         self.logger.info(self.scan_mr_iteration_folder)
         self.logger.info(self.suffix)
         self.get_draw_timepoints()
+        self.save_medata()
                   
     def init_variables(self):
         
@@ -827,6 +828,44 @@ class RiemannianTensorCompletionStructural(object):
                      "; 3rd TS: " + str(self.middle_ts2)  + "Max TS: " + str(self.max_ts))
         
         return self.first_ts, self.middle_ts1, self.middle_ts2, self.max_ts
+    
+    def save_medata(self):
+        md_output = OrderedDict()
+        indices = []
+        indices.append(1)
+        md_output['mr'] = self.missing_ratio
+        md_output['random_ts'] = self.random_ts
+        md_output['ts_count'] = len(self.random_ts)
+        md_output['rank'] = self.max_tt_rank
+        md_output['tr1'] = self.first_ts
+        md_output['tr2'] = self.middle_ts1
+        md_output['tr3'] = self.middle_ts2
+        md_output['tr4'] = self.max_ts
+        metadata_df = pd.DataFrame(md_output, index=indices)
+        fig_id = 'metadata' + '_' + self.suffix
+        mrd.save_csv_by_path(metadata_df, self.meta.images_metadata_folder, fig_id) 
+        
+        index_ts = []
+        random_ts_output = OrderedDict()
+        random_ts_arr = []
+        
+        i = 0
+        ts_set = set()
+        for key in self.random_ts.keys():  
+            ts_set.add(self.random_ts[key])
+        
+        self.logger.info("Time Points Random Set: " + str(ts_set))
+            
+        for item in ts_set:
+            random_ts_arr.append(item)
+            i = i + 1
+            index_ts.append(i)
+         
+        random_ts_output['timepoint'] = random_ts_arr           
+        fig_id = 'random_ts' + '_' + self.suffix
+        random_ts_df = pd.DataFrame(random_ts_output, index=index_ts)
+        mrd.save_csv_by_path(random_ts_df, self.meta.images_metadata_folder, fig_id)
+       
         
         
 

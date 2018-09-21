@@ -140,6 +140,18 @@ def tsc_z_score(x_hat,x_true, ten_ones, mask, z_score_mask):
 
 def isNaN(num):
     return num != num
+
+def get_z_score_robust_spatial_mask(x_img, z_score_cut_off):
+    mu = np.median(np.array(x_img.get_data()))
+    sigma = np.stack([mad(np.array(x_img.get_data()))] * np.array(x_img.get_data()).shape[-1], -1)
+    idxs = np.where(np.abs(sigma) > 1e-10)
+    ground_truth_z_score = np.array(x_img.get_data()) - mu[..., np.newaxis]
+    ground_truth_z_score[idxs] /= sigma[idxs]
+    mask_z_score_indices = (abs(ground_truth_z_score) > z_score_cut_off).astype('int')
+    print ("Z-score indices count: " + str(get_mask_z_indices_count(mask_z_score_indices)))
+    return mask_z_score_indices
+
+#z_score_d_mask = get_z_score_robust_spatial_mask(spike_6_img, 4) 
     
 
     
