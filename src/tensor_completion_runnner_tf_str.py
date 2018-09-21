@@ -61,7 +61,7 @@ def complete_random_4Dsize1():
     #    ts = stp.create_random_frames(144, frame_count)
     #    meta.logger.info("MR = " + str(mr) + "; " + str(ts.values()) + "; Timepoint Count: " + str(frame_count))
     
-    
+   
     x0, y0, z0 = (2,32,22)
     # size 1
     x_r, y_r, z_r = (7,10,8)
@@ -72,12 +72,13 @@ def complete_random_4Dsize1():
         
 def complete_random_4Dsize2():
     subject_scan_path = du.get_full_path_subject1()
-    meta = mdt.Metadata('random', 4)
+    meta = mdt.Metadata('structural', 4)
     root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
-    #observed_ratio_list = [0.95,0.9]
+    #observed_ratio_list = [0.95, 0.9, 0.8, 0.7, 0.75, 0.6, 0.5, 0.4, 0.3, 0.2, 0.25, 0.1]
+    #observed_ratio_list = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65]
+    observed_ratio_list = [0.7] 
     
     x0, y0, z0 = (2,32,22)
       
@@ -89,11 +90,12 @@ def complete_random_4Dsize2():
         
 def complete_random_4Dsize3():
     subject_scan_path = du.get_full_path_subject1()
-    meta = mdt.Metadata('random', 4)
+    meta = mdt.Metadata('structural', 4)
     root_dir = config.get('log', 'scratch.dir4Dstr')
     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
     
-    observed_ratio_list = [0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+    #observed_ratio_list = [0.95,0.9, 0.8, 0.7, 0.75, 0.6, 0.5, 0.4, 0.3, 0.2, 0.25, 0.1]
+    observed_ratio_list = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7]
     
     x0, y0, z0 = (2,32,22)
   
@@ -172,8 +174,13 @@ if __name__ == "__main__":
     pass
     #complete_random_2D()
     #complete_random_4Dsize1()
+
+    #complete_random_4Dsize2()
+    #complete_random_4Dsize3()
+
     complete_random_4D_by_tr_size()
     #complete_random_4Dsize2()
+
     #complete_random_3D()
 
     
