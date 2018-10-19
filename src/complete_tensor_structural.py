@@ -48,7 +48,7 @@ class TensorCompletionStructural(object):
         
         self.tensor_shape = tu.get_tensor_shape(self.x_true_data)
         self.max_tt_rank = tu.get_max_rank(self.x_true_reshaped_rank)
-        self.max_tt_rank = 87
+        self.max_tt_rank = 46
         
         self.logger.info("Tensor Shape: " + str(self.tensor_shape) + "; Max Rank: " + str(self.max_tt_rank))
              
@@ -162,34 +162,7 @@ class TensorCompletionStructural(object):
         
                 
     def complete2D(self):
-        self.z_scored_mask = tu.get_z_scored_mask(self.ground_truth_img, 2)
-        self.logger.info("Z-score Mask Indices Count: " + str(tu.get_mask_z_indices_count(self.z_scored_mask)))
-     
-        
-        self.rtc_runner = rtc.RiemannianTensorCompletionStructural(self.ground_truth_img,
-                                                    self.ground_truth, self.tensor_shape, 
-                                                    self.x_init,
-                                                    self.mask_indices, 
-                                                    self.z_scored_mask,
-                                                    self.sparse_observation,
-                                                    self.norm_sparse_observation, 
-                                                    self.x_init_tcs,
-                                                    self.ten_ones, 
-                                                    self.max_tt_rank, 
-                                                    self.observed_ratio,
-                                                    self.epsilon, self.train_epsilon,
-                                                    self.backtrack_const, self.logger, 
-                                                    self.meta, self.d, self.ellipsoid_mask, self.z_score
-                                                    )
-        self.rtc_runner.complete()
-        
-        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 0), image.index_img(self.rtc_runner.x_hat_img,0), image.index_img(self.rtc_runner.x_miss_img, 20), "2D fMRI Tensor Completion",
-                                             self.rtc_runner.tsc_score, self.observed_ratio, self.rtc_runner.tsc_score, self.rtc_runner.tcs_z_score, 2, coord=None, folder=self.rtc_runner.meta.images_folder,  iteration = -1)
-    
-        pass
-    
-    def complete3D(self):
-        self.z_scored_mask = tu.get_z_scored_mask(self.ground_truth_img, 2)
+        self.z_scored_mask = tu.get_z_score_robust_mask(self.ground_truth_img, 2)
         self.logger.info("Z-score Mask Indices Count: " + str(tu.get_mask_z_indices_count(self.z_scored_mask)))
 
         self.rtc_runner = rtc.RiemannianTensorCompletionStructural(self.ground_truth_img,
@@ -206,14 +179,42 @@ class TensorCompletionStructural(object):
                                                     self.epsilon, self.train_epsilon,
                                                     self.backtrack_const, self.logger, self.meta, self.d, 
                                                     self.ellipsoid_mask,
+                                                    self.random_ts,
                                                     self.z_score
                                                     )
         self.rtc_runner.complete()
-        
-        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 0), image.index_img(self.rtc_runner.x_hat_img,0), image.index_img(self.rtc_runner.x_miss_img, 0), "3D fMRI Tensor Completion",
+                        
+        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 0), image.index_img(self.rtc_runner.x_hat_img,0), image.index_img(self.rtc_runner.x_miss_img, 0), "2D fMRI Tensor Completion",
                                              self.rtc_runner.tsc_score, self.observed_ratio, self.rtc_runner.tsc_score, self.rtc_runner.tcs_z_score, 2, coord=None, folder=self.rtc_runner.meta.images_folder,  iteration = -1)
     
+        pass
     
+    def complete3D(self):
+        self.z_scored_mask = tu.get_z_score_robust_mask(self.ground_truth_img, 2)
+        self.logger.info("Z-score Mask Indices Count: " + str(tu.get_mask_z_indices_count(self.z_scored_mask)))
+
+        self.rtc_runner = rtc.RiemannianTensorCompletionStructural(self.ground_truth_img,
+                                                    self.ground_truth, self.tensor_shape, 
+                                                    self.x_init,
+                                                    self.mask_indices, 
+                                                    self.z_scored_mask,
+                                                    self.sparse_observation,
+                                                    self.norm_sparse_observation, 
+                                                    self.x_init_tcs,
+                                                    self.ten_ones, 
+                                                    self.max_tt_rank, 
+                                                    self.observed_ratio,
+                                                    self.epsilon, self.train_epsilon,
+                                                    self.backtrack_const, self.logger, self.meta, self.d, 
+                                                    self.ellipsoid_mask,
+                                                    self.random_ts,
+                                                    self.z_score
+                                                    )
+        self.rtc_runner.complete()
+  
+        mrd.draw_original_vs_reconstructed_rim_z_score(image.index_img(self.ground_truth_img, 0), image.index_img(self.rtc_runner.x_hat_img,0), image.index_img(self.rtc_runner.x_miss_img, 0), "3D fMRI Tensor Completion",
+                                             self.rtc_runner.tsc_score, self.observed_ratio, self.rtc_runner.tsc_score, self.rtc_runner.tcs_z_score, 2, coord=None, folder=self.rtc_runner.meta.images_folder,  iteration = -1)
+        
     def complete4D(self):
         
         #self.z_scored_mask = tu.get_z_scored_mask(self.ground_truth_img, 2)
