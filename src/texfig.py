@@ -18,11 +18,12 @@ FONT_SIZE = 8
 mpl.rcParams.update({
     "text.usetex": True,
     "pgf.texsystem": "xelatex",
+    'text.latex.unicode': True,
     "pgf.rcfonts": False,
-    "font.family": "sans-serif",
-    "font.serif": [],
-    "font.sans-serif": ["Arial"],
-    "font.monospace": [],
+    "font.family":"serif",
+    "font.serif": ["Times", "Palatino", "New Century Schoolbook", "Bookman", "Computer Modern Roman"],
+    "font.sans-serif": ["Helvetica", "Avant Garde", "Computer Modern Sans serif"],
+    "font.monospace": ["Courier", "Computer Modern Typewriter"],
     "figure.figsize": [default_width, default_width * default_ratio],
     "pgf.preamble": [
         # put LaTeX preamble declarations here
@@ -42,7 +43,9 @@ mpl.rcParams.update({
     'savefig.pad_inches':0,
     'xtick.major.size' : 2,
     'ytick.major.size' : 2,
-    'axes.linewidth' : 0.5
+    'axes.linewidth' : 0.5,
+    'image.cmap' : 'gray',
+    'image.interpolation' : 'none'
 })
 
 import matplotlib.pyplot as plt
@@ -64,11 +67,11 @@ def figure(width=default_width, ratio=default_ratio, pad=0, tight_layout=False, 
 """
 Returns subplots with an appropriate figure size and tight layout.
 """
-def subplots(width=default_width, ratio=default_ratio, *args, **kwargs):
+def subplots(width=default_width, ratio=default_ratio, pad=0, *args, **kwargs):
     fig, axes = plt.subplots(figsize=(width, width * ratio), *args, **kwargs)
-    fig.set_tight_layout({
-        'pad': 0
-    })
+    #fig.set_tight_layout({
+    #    'pad': pad
+    #})
     return fig, axes
 
 
@@ -78,3 +81,11 @@ Save both a PDF and a PGF file with the given filename.
 def savefig(filename, *args, **kwargs):
     plt.savefig(filename + "_pub"+ '.pdf', *args, **kwargs)
     plt.savefig(filename + "_pub" + '.pgf', *args, **kwargs)
+    plt.close()
+    
+def savefig_pub(filename, *args, **kwargs):
+    plt.savefig(filename + "_pub"+ '.pdf', dpi=1000, *args, **kwargs)
+    file_path = filename + "_pub" + '.pdf'
+    plt.savefig(filename + "_pub" + '.pgf', *args, **kwargs)
+    print ("Saving figure: @" + str( file_path))
+    plt.close()

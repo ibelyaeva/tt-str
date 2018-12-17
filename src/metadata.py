@@ -6,6 +6,7 @@ import logging
 from datetime import datetime
 import file_service as fs
 import os
+import csv
 
 class Metadata(object):
     
@@ -13,6 +14,7 @@ class Metadata(object):
     def __init__(self, pattern, n):
         config_loc = path.join('config')
         config_filename = 'solution-ec2.config'
+        #config_filename = 'solution.config'
         config_file = os.path.join(config_loc, config_filename)
         config = configparser.ConfigParser()
         config.read(config_file)
@@ -73,12 +75,29 @@ class Metadata(object):
         self.logger.info("Created MR Images Iteration [%s] Folder at: [%s]" ,suffix, self.scan_images_iteration_folder)
         self.logger.info("Created MR Images Final Iteration [%s] Folder at: [%s]" ,suffix, self.images_folder_mr_final_dir)
         self.logger.info("Created MR Images Metadata [%s] Folder at: [%s]" ,suffix, self.images_metadata_folder)
-        return self.scan_images_iteration_folder
-        
+        return self.scan_images_iteration_folder      
     
     def get_suffix(self,mr):    
         suffix = str(int(round((mr) * 100.0, 0)))
         return suffix
+    
+    def create_solution_file(self):
+       
+        self.col_names = ['tensor_dim', 'k', 'observed_ratio', 'mr', 'ts_count', 'el_volume', 'roi_volume', 'tcs_cost', 'roi_volume_label', 'tsc_z_cost', 'rse_cost', 
+                     'train_cost', 'solution_cost', 'image_final_path', 'scan_final_path', 'scan_iteration_path', 'metadata_path']
+        
+        self.global_solution_path = os.path.join(self.root_dir, 'global_solution_'+ str(self.n) + '_' + self.pattern +'.csv')
+        if not os.path.exists(self.global_solution_path):
+            with open(self.global_solution_path,"ab") as global_solution_file:
+                writer  = csv.DictWriter(global_solution_file, fieldnames=self.col_names)
+                writer.writeheader()
+                
+            
+            global_solution_file.close()
+            
+        
+    def set_solution_label(self, solution_label):
+        self.solution_label = solution_label
     
 def create_logger(config):
     

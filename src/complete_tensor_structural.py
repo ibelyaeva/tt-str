@@ -1,8 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
-tf.set_random_seed(0)
-np.random.seed(0)
+#tf.set_random_seed(0)
+#np.random.seed(0)
 import metric_util as mt
 from nilearn import image
 import copy
