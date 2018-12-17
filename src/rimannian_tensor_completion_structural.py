@@ -3,8 +3,8 @@ import texfig
 import tensorflow as tf
 import numpy as np
 import t3f
-tf.set_random_seed(0)
-np.random.seed(0)
+#tf.set_random_seed(0)
+#np.random.seed(0)
 import matplotlib.pyplot as plt
 import metric_util as mt
 import data_util as du
@@ -29,6 +29,7 @@ import tensor_util as tu
 import nibabel as nib
 import os
 import metadata as mdt
+import csv
 
 
 class RiemannianTensorCompletionStructural(object):
@@ -348,7 +349,11 @@ class RiemannianTensorCompletionStructural(object):
         print gradnorm_val, alpha_val, cost_val, cost_new_val, eta_norm_val, tsc_score_val
         self.logger.info("tsc_score_0:" + str(tsc_score_val))
         
+        #cost history
+        self.cost_history.append(cost_val)
+        
         #tcs history
+        tsc_score_val = min(1.00, tsc_score_val)
         self.tcs_cost_history.append(tsc_score_val)
         
         #train history
@@ -371,12 +376,13 @@ class RiemannianTensorCompletionStructural(object):
         
         self.save_solution_scans_iteration(self.suffix, self.scan_mr_iteration_folder, 0)
         self.save_cost_history()
+        self.update_global_solution_file(0)
         
         i = 0
         cost_nan = False
         self.logger.info("Epsilon: " + str(self.epsilon))
-        while gradnorm_val > self.epsilon: 
-        #for k in range(2):
+        #while gradnorm_val > self.epsilon: 
+        for k in range(2):
             i = i + 1
             F_v, gradnorm_val, alpha_val, theta_val, beta_val, cost_new_val, cost_val, tsc_score_val, eta_norm_val, inprod_grad_eta_val, riemannian_grad_norm_val, _, _, _, _, _, _ = self.sess.run([self.loss, self.gradnorm_omega, self.alpha,
                            self.theta, self.beta, self.cost_new, self.cost,
@@ -509,6 +515,7 @@ class RiemannianTensorCompletionStructural(object):
             self.save_solution_scans_iteration(self.suffix, self.scan_mr_iteration_folder, i)
             self.logger.info("Len TSC Score History: " + str(len(self.tcs_cost_history)))
             self.save_cost_history()
+            self.update_global_solution_file(i)
             
             
             if i > 1:
@@ -557,6 +564,7 @@ class RiemannianTensorCompletionStructural(object):
         # save final solution scans
         self.save_solution_scans(self.suffix, self.scan_mr_folder)
         self.save_cost_history()
+        self.update_global_solution_file(i)
         
         self.logger.info("Done ...")
         print("Done ...")
@@ -608,9 +616,14 @@ class RiemannianTensorCompletionStructural(object):
         self.logger.info("Folder: " + str(folder))
         self.logger.info("Iteration: " + str(iteration))
         
-        x_true_path = os.path.join(folder,"x_true_img_" + str(suffix) + '_' + str(iteration))
-        x_hat_path = os.path.join(folder,"x_hat_img_" + str(suffix) + '_' + str(iteration))
-        x_miss_path = os.path.join(folder,"x_miss_img_" + str(suffix) + '_' + str(iteration))
+        # Commenting out saving scan per iteration to save disk space
+        #x_true_path = os.path.join(folder,"x_true_img_" + str(suffix) + '_' + str(iteration))
+        #x_hat_path = os.path.join(folder,"x_hat_img_" + str(suffix) + '_' + str(iteration))
+        #x_miss_path = os.path.join(folder,"x_miss_img_" + str(suffix) + '_' + str(iteration))
+        
+        x_true_path = os.path.join(folder,"x_true_img")
+        x_hat_path = os.path.join(folder,"x_hat_img")
+        x_miss_path = os.path.join(folder,"x_miss_img")
         
         self.logger.info("x_hat_path: " + str(x_hat_path))
         nib.save(self.x_hat_img, x_hat_path)
@@ -627,31 +640,59 @@ class RiemannianTensorCompletionStructural(object):
         self.effective_roi_volume = self.ellipsoid_mask.effective_roi_volume
             
         # first ts
+        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
+             #           image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title + " Iteration: " + str(iteration),
+             #           self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+             #          self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.first_ts)
+        
+        # second ts
+        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),
+         #               image.index_img(self.x_hat_img,self.middle_ts1), image.index_img(self.x_miss_img, self.middle_ts1), self.title + " Iteration: " + str(iteration),
+          #              self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+          #             self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.middle_ts1)
+        
+        # third ts
+        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts2),
+         #               image.index_img(self.x_hat_img,self.middle_ts2), image.index_img(self.x_miss_img, self.middle_ts2), self.title + " Iteration: " + str(iteration),
+         #               self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+         #              self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.middle_ts2)
+        
+        # fourth ts
+        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.max_ts),
+                  #      image.index_img(self.x_hat_img,self.max_ts), image.index_img(self.x_miss_img, self.max_ts), self.title + " Iteration: " + str(iteration),
+                   #     self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                    #   self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.max_ts)
+        
+        
+        #self.save_final_images(iteration)
+    
+    def save_final_images(self, iteration):
+        
+        # first ts
         mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
-                        image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title + " Iteration: " + str(iteration),
-                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
-                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.first_ts)
+                        image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title,
+                    self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.first_ts)
         
         # second ts
         mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),
-                        image.index_img(self.x_hat_img,self.middle_ts1), image.index_img(self.x_miss_img, self.middle_ts1), self.title + " Iteration: " + str(iteration),
-                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
-                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.middle_ts1)
+                        image.index_img(self.x_hat_img,self.middle_ts1), image.index_img(self.x_miss_img, self.middle_ts1), self.title,
+                    self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.middle_ts1)
         
         # third ts
         mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts2),
-                        image.index_img(self.x_hat_img,self.middle_ts2), image.index_img(self.x_miss_img, self.middle_ts2), self.title + " Iteration: " + str(iteration),
-                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
-                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.middle_ts2)
+                        image.index_img(self.x_hat_img,self.middle_ts2), image.index_img(self.x_miss_img, self.middle_ts2), self.title,
+                    self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.middle_ts2)
         
         # fourth ts
         mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.max_ts),
-                        image.index_img(self.x_hat_img,self.max_ts), image.index_img(self.x_miss_img, self.max_ts), self.title + " Iteration: " + str(iteration),
-                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
-                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.max_ts)
+                        image.index_img(self.x_hat_img,self.max_ts), image.index_img(self.x_miss_img, self.max_ts), self.title,
+                    self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.max_ts)
         
-    
-            
+        
         
     def save_cost_history(self):
         
@@ -865,7 +906,39 @@ class RiemannianTensorCompletionStructural(object):
         fig_id = 'random_ts' + '_' + self.suffix
         random_ts_df = pd.DataFrame(random_ts_output, index=index_ts)
         mrd.save_csv_by_path(random_ts_df, self.meta.images_metadata_folder, fig_id)
-       
+        
+        
+    def update_global_solution_file(self, k):
+            
+        
+        metadata_id = 'metadata' + '_' + self.suffix +".csv"
+        metadata_path = os.path.join(self.meta.images_metadata_folder,metadata_id)
+        
+        row = {}
+        row['tensor_dim'] = self.d
+        row['k'] = k
+        row['observed_ratio'] = self.observed_ratio
+        row['mr'] = self.missing_ratio
+        row['ts_count'] =  len(self.random_ts)
+        row['el_volume'] = self.ellipsoid_mask.el_volume
+        row['roi_volume'] = self.effective_roi_volume
+        row['roi_volume_label'] = self.meta.solution_label
+        row['tcs_cost'] = min(1.00, self.tcs_cost_history[k])
+        row['tsc_z_cost'] = min(1.00, self.tcs_z_scored_history[k])
+        row['train_cost'] = min(1.00, self.train_cost_history[k])
+        row['rse_cost'] = self.rse_cost_history[k]
+        row['solution_cost'] = self.cost_history[k]
+        row['image_final_path'] = self.meta.images_folder_mr_final_dir
+        row['scan_final_path'] = self.scan_mr_folder
+        row['scan_iteration_path'] = self.scan_mr_iteration_folder
+        row['metadata_path'] = metadata_path
+            
+        with open(self.meta.global_solution_path,"ab") as global_solution_file:
+            writer  = csv.DictWriter(global_solution_file, fieldnames=self.meta.col_names)
+            writer.writerow(row)
+            
+        global_solution_file.close()
+            
         
         
 
