@@ -7,6 +7,7 @@ from datetime import datetime
 import file_service as fs
 import os
 import csv
+from cg_optimize import observed_ratio
 
 class Metadata(object):
     
@@ -81,12 +82,34 @@ class Metadata(object):
         suffix = str(int(round((mr) * 100.0, 0)))
         return suffix
     
-    def create_solution_file(self):
+    def set_suffix(self,observed_ratio):
+        mr = 1.00 - observed_ratio
+        self.suffix = str(int(round((mr) * 100.0, 0)))
+        return self.suffix
+    
+    def create_solution_file(self, solution_label):
        
         self.col_names = ['tensor_dim', 'k', 'observed_ratio', 'mr', 'ts_count', 'el_volume', 'roi_volume', 'tcs_cost', 'roi_volume_label', 'tsc_z_cost', 'rse_cost', 
                      'train_cost', 'solution_cost', 'image_final_path', 'scan_final_path', 'scan_iteration_path', 'metadata_path']
         
+        self.set_solution_label(solution_label)   
         self.global_solution_path = os.path.join(self.root_dir, 'global_solution_'+ str(self.n) + '_' + self.pattern +'.csv')
+        if not os.path.exists(self.global_solution_path):
+            with open(self.global_solution_path,"ab") as global_solution_file:
+                writer  = csv.DictWriter(global_solution_file, fieldnames=self.col_names)
+                writer.writeheader()
+                
+            
+            global_solution_file.close()
+            
+    def create_solution_file_by_mr(self, observed_ratio, solution_label):
+       
+        self.col_names = ['tensor_dim', 'k', 'observed_ratio', 'mr', 'ts_count', 'el_volume', 'roi_volume', 'tcs_cost', 'roi_volume_label', 'tsc_z_cost', 'rse_cost', 
+                     'train_cost', 'solution_cost', 'image_final_path', 'scan_final_path', 'scan_iteration_path', 'metadata_path']
+        
+        self.set_suffix(observed_ratio)
+        self.set_solution_label(solution_label)
+        self.global_solution_path = os.path.join(self.root_dir, 'global_solution_'+ str(self.n) + 'D_' + self.pattern + '_' + self.solution_label + '.csv')
         if not os.path.exists(self.global_solution_path):
             with open(self.global_solution_path,"ab") as global_solution_file:
                 writer  = csv.DictWriter(global_solution_file, fieldnames=self.col_names)
