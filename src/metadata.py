@@ -7,7 +7,6 @@ from datetime import datetime
 import file_service as fs
 import os
 import csv
-from cg_optimize import observed_ratio
 
 class Metadata(object):
     
