@@ -109,7 +109,7 @@ class Metadata(object):
         
         self.set_suffix(observed_ratio)
         self.set_solution_label(solution_label)
-        self.global_solution_path = os.path.join(self.root_dir, 'global_solution_'+ str(self.n) + 'D_' + self.pattern + '_' + self.solution_label + '.csv')
+        self.global_solution_path = os.path.join(self.root_dir, 'global_solution_'+ str(self.n) + 'D_' + self.pattern + '_' + 'mr' + str(self.suffix) + '_' +self.solution_label + '.csv')
         if not os.path.exists(self.global_solution_path):
             with open(self.global_solution_path,"ab") as global_solution_file:
                 writer  = csv.DictWriter(global_solution_file, fieldnames=self.col_names)
