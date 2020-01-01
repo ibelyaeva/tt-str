@@ -58,6 +58,13 @@ def save_fig_png(fig_id, tight_layout=True):
         plt.savefig(path, format='png', facecolor='k', edgecolor='k', dpi=300)
         plt.close()
         
+def save_fig_pdf(fig_id, tight_layout=True):
+        path = os.path.join(fig_id + ".pdf")
+        print("Saving figure", path)
+        print("Called from mrd")
+        plt.savefig(path, format='pdf', facecolor='k', edgecolor='k', dpi=300)
+        plt.close()
+        
 def save_report_fig(fig_id, tight_layout=True):
         path = os.path.join(PROJECT_DIR, FIGURES, fig_id + ".png")
         print("Saving figure", path)
@@ -77,6 +84,11 @@ def save_csv_by_path(df, file_path, dataset_id):
     path = os.path.join(file_path, dataset_id + ".csv")
     print("Saving dataset", path)
     df.to_csv(path)
+
+def save_csv_by_path_adv(df, file_path, dataset_id, index = False):
+    path = os.path.join(file_path, dataset_id + ".csv")
+    print("Saving dataset", path)
+    df.to_csv(path, index = index)
     
 def draw_original_vs_reconstructed(img_ref, x_true, x_hat, x_miss, plot_title, observed_ratio, coord=None):
     grid_rows = 4
@@ -391,7 +403,7 @@ def draw_original_vs_reconstructed_rim_z_score(x_true_img, x_hat_img, x_miss_img
     if time >=0:
         fig_id = fig_id + '_timepoint_' + str(time)  
 
-    save_fig_png(fig_id) 
+    save_fig_pdf(fig_id) 
     
 def draw_original_vs_reconstructed_rim_z_score_str(x_true_img, x_hat_img, x_miss_img, plot_title, relative_error, observed_ratio, tcs, tcs_z_score, z_score, roi_volume, coord=None, coord_tuple = None, folder=None, iteration=-1, time=-1):
         

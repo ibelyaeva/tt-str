@@ -10,8 +10,8 @@ import structural_pattern_generator as stp
 
 
 config_loc = path.join('config')
-#config_filename = 'solution.config'
-config_filename = 'solution-ec2.config'
+config_filename = 'solution.config'
+#config_filename = 'solution-ec2.config'
 config_file = os.path.join(config_loc, config_filename)
 config = configparser.ConfigParser()
 config.read(config_file)
@@ -150,6 +150,8 @@ def complete_random_2D_by_tr_size():
     
     observed_ratio_list = [0.95, 0.9,0.85,0.8,0.75,0.7]
     
+    observed_ratio_list = [0.9]
+    
     # ellipse center
     x0, y0, z0 = (2,32,22)
     
@@ -163,15 +165,15 @@ def complete_random_2D_by_tr_size():
     volumes_list.append((12,10,8))
     
     volumes_label = {}
-    volumes_label['size0'] = (7,10,8)
-    volumes_label['size1'] = (8,10,8)
-    volumes_label['size2'] = (9,10,8)
-    volumes_label['size3'] = (10,10,8)
-    volumes_label['size4'] = (11,10,8)
+    #volumes_label['size0'] = (7,10,8)
+    #volumes_label['size1'] = (8,10,8)
+    #volumes_label['size2'] = (9,10,8)
+    #volumes_label['size3'] = (10,10,8)
+    #volumes_label['size4'] = (11,10,8)
     volumes_label['size5'] = (12,10,8)
     
     
-    n= 2
+    n= 1
     
     for item in observed_ratio_list:
         for i in range (0, n, 1):
@@ -203,14 +205,16 @@ def complete_random_3D_by_tr_size():
     volumes_list.append((12,10,8))
     
     volumes_label = {}
-    volumes_label['size0'] = (7,10,8)
-    volumes_label['size1'] = (8,10,8)
-    volumes_label['size2'] = (9,10,8)
-    volumes_label['size3'] = (10,10,8)
-    volumes_label['size4'] = (11,10,8)
-    volumes_label['size5'] = (12,10,8)
+    #volumes_label['size0'] = (7,10,8)
+    #volumes_label['size1'] = (8,10,8)
+    #volumes_label['size2'] = (9,10,8)
+    #volumes_label['size3'] = (10,10,8)
+    #volumes_label['size4'] = (11,10,8)
+    #volumes_label['size5'] = (12,10,8)
     
-    n= 2
+    volumes_label['size1'] = (20,15,13)
+    
+    n= 1
     
     for item in observed_ratio_list:
         for i in range (0, n, 1):
@@ -230,6 +234,8 @@ def complete_random_4D_by_tr_size():
     
     observed_ratio_list = [0.95, 0.9,0.85,0.8,0.75,0.7]
     
+    observed_ratio_list = [0.98]
+    
     # ellipse center
     x0, y0, z0 = (2,32,22)
     
@@ -243,14 +249,14 @@ def complete_random_4D_by_tr_size():
     volumes_list.append((12,10,8))
     
     volumes_label = {}
-    volumes_label['size0'] = (7,10,8)
-    volumes_label['size1'] = (8,10,8)
-    volumes_label['size2'] = (9,10,8)
-    volumes_label['size3'] = (10,10,8)
-    volumes_label['size4'] = (11,10,8)
-    volumes_label['size5'] = (12,10,8)
+    #volumes_label['size0'] = (7,10,8)
+    volumes_label['size1'] = (25,20,20)
+    #volumes_label['size2'] = (9,10,8)
+    #volumes_label['size3'] = (10,10,8)
+    #volumes_label['size4'] = (11,10,8)
+    #volumes_label['size5'] = (12,10,8)
     
-    n= 2
+    n= 1
     
     for item in observed_ratio_list:
         for i in range (0, n, 1):

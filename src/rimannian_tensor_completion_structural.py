@@ -3,8 +3,8 @@ import texfig
 import tensorflow as tf
 import numpy as np
 import t3f
-#tf.set_random_seed(0)
-#np.random.seed(0)
+tf.set_random_seed(0)
+np.random.seed(0)
 import matplotlib.pyplot as plt
 import metric_util as mt
 import data_util as du
@@ -381,8 +381,8 @@ class RiemannianTensorCompletionStructural(object):
         i = 0
         cost_nan = False
         self.logger.info("Epsilon: " + str(self.epsilon))
-        #while gradnorm_val > self.epsilon: 
-        for k in range(2):
+        while gradnorm_val > self.epsilon: 
+        #for k in range(20):
             i = i + 1
             F_v, gradnorm_val, alpha_val, theta_val, beta_val, cost_new_val, cost_val, tsc_score_val, eta_norm_val, inprod_grad_eta_val, riemannian_grad_norm_val, _, _, _, _, _, _ = self.sess.run([self.loss, self.gradnorm_omega, self.alpha,
                            self.theta, self.beta, self.cost_new, self.cost,
@@ -588,25 +588,25 @@ class RiemannianTensorCompletionStructural(object):
         
         self.effective_roi_volume = self.ellipsoid_mask.effective_roi_volume
 
-        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
-                        image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title,
-                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
-                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.first_ts)
+        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
+         #               image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title,
+          #          self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
+           #         self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.first_ts)
         
-        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),
-                        image.index_img(self.x_hat_img,self.middle_ts1), image.index_img(self.x_miss_img, self.middle_ts1), self.title,
-                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
-                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.middle_ts1)
+        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),
+         #               image.index_img(self.x_hat_img,self.middle_ts1), image.index_img(self.x_miss_img, self.middle_ts1), self.title,
+          #          self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
+           #         self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.middle_ts1)
         
-        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts2),
-                        image.index_img(self.x_hat_img,self.middle_ts2), image.index_img(self.x_miss_img, self.middle_ts2), self.title,
-                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
-                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.middle_ts2)
+        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts2),
+         #               image.index_img(self.x_hat_img,self.middle_ts2), image.index_img(self.x_miss_img, self.middle_ts2), self.title,
+          #          self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
+           #         self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.middle_ts2)
         
-        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.max_ts),
-                        image.index_img(self.x_hat_img,self.max_ts), image.index_img(self.x_miss_img, self.max_ts), self.title,
-                    self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
-                    self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.max_ts)
+        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.max_ts),
+         #               image.index_img(self.x_hat_img,self.max_ts), image.index_img(self.x_miss_img, self.max_ts), self.title,
+         #           self.tsc_score, self.observed_ratio, self.tsc_score, self.tcs_z_score, 2, 
+          #          self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.meta.images_folder_mr_final_dir, iteration=-1, time=self.max_ts)
         
         
     def save_solution_scans_iteration(self, suffix, folder, iteration): 
@@ -617,13 +617,13 @@ class RiemannianTensorCompletionStructural(object):
         self.logger.info("Iteration: " + str(iteration))
         
         # Commenting out saving scan per iteration to save disk space
-        #x_true_path = os.path.join(folder,"x_true_img_" + str(suffix) + '_' + str(iteration))
-        #x_hat_path = os.path.join(folder,"x_hat_img_" + str(suffix) + '_' + str(iteration))
-        #x_miss_path = os.path.join(folder,"x_miss_img_" + str(suffix) + '_' + str(iteration))
+        x_true_path = os.path.join(folder,"x_true_img_" + str(suffix) + '_' + str(iteration))
+        x_hat_path = os.path.join(folder,"x_hat_img_" + str(suffix) + '_' + str(iteration))
+        x_miss_path = os.path.join(folder,"x_miss_img_" + str(suffix) + '_' + str(iteration))
         
-        x_true_path = os.path.join(folder,"x_true_img")
-        x_hat_path = os.path.join(folder,"x_hat_img")
-        x_miss_path = os.path.join(folder,"x_miss_img")
+        #x_true_path = os.path.join(folder,"x_true_img")
+        #x_hat_path = os.path.join(folder,"x_hat_img")
+        #x_miss_path = os.path.join(folder,"x_miss_img")
         
         self.logger.info("x_hat_path: " + str(x_hat_path))
         nib.save(self.x_hat_img, x_hat_path)
@@ -640,10 +640,10 @@ class RiemannianTensorCompletionStructural(object):
         self.effective_roi_volume = self.ellipsoid_mask.effective_roi_volume
             
         # first ts
-        #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
-             #           image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title + " Iteration: " + str(iteration),
-             #           self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
-             #          self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.first_ts)
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
+                        image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title + " Iteration: " + str(iteration),
+                        self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
+                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.first_ts)
         
         # second ts
         #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),

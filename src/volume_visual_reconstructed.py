@@ -20,8 +20,6 @@ import nilearn
 
 from mayavi.modules.text import Text
 
-from medpy.io import load
-from medpy.features.intensity import intensities
 from nilearn import image
 import nibabel as nib
 from medpy.io import header
@@ -30,17 +28,7 @@ import copy
 from nilearn import plotting
 import os
 import SimpleITK as sitk
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import random
-from math import ceil
-from nilearn.datasets import MNI152_FILE_PATH
-from sklearn.model_selection import train_test_split
-from nibabel.affines import apply_affine
-from nilearn.image.resampling import coord_transform, get_bounds, get_mask_bounds
-from skimage.draw import ellipsoid
-from nilearn.image import resample_img
-from nilearn.masking import compute_background_mask
+
 
 
 def read_image(folder, path):
@@ -54,10 +42,12 @@ def get_data(img):
 ################################################################################
 # Create some data
 #x, y, z = np.ogrid[-5:5:64j, -5:5:64j, -5:5:64j]
-folder = "/work/rs1"
-filepath = "x_hat_img_0.nii"
+#folder = "/work/str/4D/mr/15/size5/scans/final/mr/15/15"
+#filepath = "x_hat_img_15.nii"
+folder = "/work/scratch/tensor_completion/4D/structural/run_2019-09-29_12_31_09/d4/structural/scans/iteration/mr/2"
+filepath = "x_hat_img_2_16.nii"
 data4D= read_image(folder, filepath)
-data = image.index_img(data4D, 0).get_data()
+data = image.index_img(data4D, 121).get_data()
 x, y, z = np.mgrid[-78:78+1:3, -111:75+1:3, -51:84+1:3]
 #data = np.sin(3*x)/x + 0.05*z**2 + np.cos(3*y)
 
@@ -235,7 +225,7 @@ class VolumeSlicer(HasTraits):
                   ),
                 ),
                 resizable=True,
-                title='Reconstructed Missing Volume - Z < 2',
+                title='',
                 )
 
 

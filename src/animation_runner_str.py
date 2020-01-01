@@ -26,17 +26,17 @@ mri_animator =  mri_vis.MRIAnimator(movies_folder, 'Original fMRI brain volume',
 
 x_miss_img_path = '/work/str/4D/mr/15/size1/scans/final/mr/15/15/x_miss_img_15.nii'
 x_miss_img = mt.read_image_abs_path(x_miss_img_path)
-mri_animator =  mri_vis.MRIAnimator(movies_folder, 'Corrupted brain volume. MR=60%', x_miss_img, x_miss_img, observed_ratio=0.6)
+mri_animator =  mri_vis.MRIAnimator(movies_folder, '', x_miss_img, x_miss_img, observed_ratio=0.6)
 
 #/work/rs/x_miss_img_60
 
-mri_animator.animate_volume(x_miss_img, 19)
+#mri_animator.animate_volume(x_miss_img, 19)
 
 mri_animator.save_anim_to_file(x_miss_img, 19)
 
 
 x_hat_img_path = '/work/rs/x_hat_img_60.nii'
-#x_hat_img = mt.read_image_abs_path(x_hat_img_path)
+x_hat_img = mt.read_image_abs_path(x_hat_img_path)
 #mri_animator =  mri_vis.MRIAnimator(movies_folder, 'Recovered brain volume. RSE=1.28E-3', x_hat_img, x_hat_img, observed_ratio=0.4)
 
 #mri_animator.save_anim_to_file(x_hat_img, 0)

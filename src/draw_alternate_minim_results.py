@@ -2420,7 +2420,7 @@ def low_rank_by_corr_level_noise_type2(noise_t, file_path,results_folder, title=
     top_labelstensor_dim = []
           
     subset = data.loc[data['noise_type'] == noise_t]
-    x = subset['corruption_error']
+    x = subset['snr']
     y = subset['low_rank_rse']
         
     lw = 1
@@ -2500,7 +2500,7 @@ def sparse_rank_by_corr_level_noise_type2(noise_t, file_path,results_folder, tit
     top_labelstensor_dim = []
           
     subset = data.loc[data['noise_type'] == noise_t]
-    x = subset['corruption_error']
+    x = subset['snr']
     y = subset['sparse_rank_rse']
         
     lw = 1
@@ -2726,19 +2726,19 @@ def draw_lsrtf_vs_godec():
     
 def draw_low_rank_by_snr():
     
-    solution_path="/work/project/cmsc655/results/alternate_min/alternate_minimization_solution_agg.csv"
-    figures_path8 = "/work/project/cmsc655/results/out/generated/low_rank_rse/by_snr_agg"
+    solution_path="/work/pl/sch/analysis/cmsc655/completed-project/project/project-distribution/csv-solution-cost/alternate_minimization_solution_agg.csv"
+    figures_path8 = "/work/pl/sch/analysis/cmsc655/completed-project/project/project-distribution/figures/gen_rep1/rse"
     
-    low_rank_by_snr(solution_path,figures_path8, title=False, log_scale=False)
-    low_rank_by_snr(solution_path,figures_path8, title=True, log_scale=False)
+    #low_rank_by_snr(solution_path,figures_path8, title=False, log_scale=False)
+    #low_rank_by_snr(solution_path,figures_path8, title=True, log_scale=False)
     
-    low_rank_by_snr_noise_type("richian", solution_path,figures_path8, title=False, log_scale=False)
-    low_rank_by_snr_noise_type("richian", solution_path,figures_path8, title=True, log_scale=False)
+    #low_rank_by_snr_noise_type("richian", solution_path,figures_path8, title=False, log_scale=False)
+    #low_rank_by_snr_noise_type("richian", solution_path,figures_path8, title=True, log_scale=False)
     
-    low_rank_by_corr_level_noise_type("richian", solution_path,figures_path8, title=True, log_scale=False)
+    #low_rank_by_corr_level_noise_type("richian", solution_path,figures_path8, title=True, log_scale=False)
     
-    low_rank_by_corr_perc(solution_path,figures_path8, title=False, log_scale=False)
-    low_rank_by_corr_perc(solution_path,figures_path8, title=True, log_scale=False)
+    #low_rank_by_corr_perc(solution_path,figures_path8, title=False, log_scale=False)
+    #low_rank_by_corr_perc(solution_path,figures_path8, title=True, log_scale=False)
     
     low_rank_by_corr_level_noise_type2("richian", solution_path,figures_path8, title=False, log_scale=False)
     low_rank_by_corr_level_noise_type2("richian", solution_path,figures_path8, title=True, log_scale=False)

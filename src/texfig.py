@@ -8,8 +8,8 @@ import matplotlib as mpl
 mpl.use('pgf')
 
 from math import sqrt
-default_width = 3.48761 # in inches
-default_width_2_col = 7.22 # in inches
+default_width = 3.5 # in inches
+default_width_2_col = 6.5 # in inches
 default_width_pt = 522
 default_ratio = (sqrt(5.0) - 1.0) / 2.0 # golden mean
 
@@ -21,8 +21,8 @@ mpl.rcParams.update({
     'text.latex.unicode': True,
     "pgf.rcfonts": False,
     "font.family":"serif",
-    "font.serif": ["Times", "Palatino", "New Century Schoolbook", "Bookman", "Computer Modern Roman"],
-    "font.sans-serif": ["Helvetica", "Avant Garde", "Computer Modern Sans serif"],
+    "font.serif": ["Times New Roman"],
+    "font.sans-serif": ["Helvetica"],
     "font.monospace": ["Courier", "Computer Modern Typewriter"],
     "figure.figsize": [default_width, default_width * default_ratio],
     "pgf.preamble": [
@@ -63,6 +63,14 @@ def figure(width=default_width, ratio=default_ratio, pad=0, tight_layout=False, 
             })
     return fig
 
+def figure1(width=default_width, ratio=default_ratio, pad=0, tight_layout=False, *args, **kwargs):
+    fig = plt.figure(figsize=(width, width * ratio), *args, **kwargs)
+    
+    if tight_layout:
+        fig.set_tight_layout({
+            'pad': pad
+            })
+    return fig
 
 """
 Returns subplots with an appropriate figure size and tight layout.
@@ -84,7 +92,7 @@ def savefig(filename, *args, **kwargs):
     plt.close()
     
 def savefig_pub(filename, *args, **kwargs):
-    plt.savefig(filename + "_pub"+ '.pdf', dpi=1000, *args, **kwargs)
+    plt.savefig(filename + "_pub"+ '.pdf', dpi=1500, *args, **kwargs)
     file_path = filename + "_pub" + '.pdf'
     plt.savefig(filename + "_pub" + '.pgf', *args, **kwargs)
     print ("Saving figure: @" + str( file_path))

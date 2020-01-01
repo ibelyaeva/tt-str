@@ -28,7 +28,7 @@ ellipsoid_mask2_path = "size_20_11_25.nii"
 ellipsoid_mask3_path = "size_35_20_25.nii"
 
 def get_folder_subject1():
-    folder_path_subject1 = "/home/ec2-user/analysis/data/subject1"
+    folder_path_subject1 = "/work/pl/sch/analysis/data/COBRE001"
     return folder_path_subject1
 
 def corrupted4D_10_frames_path():

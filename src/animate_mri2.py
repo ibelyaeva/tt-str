@@ -18,6 +18,9 @@ import glob
 import  moviepy.editor as mpy
 import os
 
+from mayavi.core.ui.api import SceneEditor, MayaviScene, \
+                                MlabSceneModel
+
 class MRIAnimator(object):
     
     def __init__(self, folder, title, x_ref, x_true, n=0, x_hat=None, x_miss=None, observed_ratio=1):
@@ -37,16 +40,12 @@ class MRIAnimator(object):
         self.set_missing_ratio()
                 
         #self.animation_file_prefix = 'anim' + 'missing_ratio'+ str(self.missing_ratio)
-        #self.animation_file_prefix = str('anim_' + 'missing_ratio'+ str(self.missing_ratio) + '_' + str('%05d.png'))
         self.animation_file_prefix = str('anim_' + 'missing_ratio'+ str(self.missing_ratio) + '_' + str('%05d.png'))
-        
             
         self.missing_file_fig_id =  str(self.folder) + "/" + "missing_ratio_" + str(self.missing_ratio)
         self.x_true_file_fig_id =  str(self.folder) + "/" + "x_true_" + str(self.missing_ratio)
         self.x_hat_file_fig_id =  str(self.folder) + "/" + "x_hat_" + str(self.missing_ratio)
         self.animation_file = self.missing_file_fig_id  +'.gif'
-        #mlab.engine.current_scene.scene.off_screen_rendering = True
-        #mlab.options.offscreen = True
         
        
     def set_missing_ratio(self):
@@ -85,13 +84,13 @@ class MRIAnimator(object):
         x2v, y2v, z2v = np.meshgrid(x, y, z, indexing = 'ij', sparse=False)
         dfdx, dfdy, dfdz = np.gradient(volume)
         
-        f = mlab.figure(12, fgcolor=(.0, .0, .0), bgcolor=(1.0, 1.0, 1.0), size=(300, 300))
+        f = mlab.figure(12, fgcolor=(.0, .0, .0), bgcolor=(1.0, 1.0, 1.0))
         
         
-        countour_sf = mlab.contour3d(xv, yv, zv, volume, contours=7, opacity=0.5, colormap='jet')
+        #countour_sf = mlab.contour3d(xv, yv, zv, volume, contours=7, opacity=0.5, colormap='jet')
         #vectors = mlab.quiver3d(x2v, y2v, z2v, dfdx, dfdy, dfdz, mode='arrow',scale_mode='vector', mask_points=8, opacity=0.8, colormap='jet')
-        mlab.outline(countour_sf, color=(0.7, .7, .7))
-        image_plane = mlab.pipeline.image_plane_widget(countour_sf,
+        #mlab.outline(countour_sf, color=(0.7, .7, .7))
+        image_plane = mlab.pipeline.image_plane_widget(volume,
                             plane_orientation='z_axes',
                             slice_index=38,transparent=True, opacity = 0.8
                         )
@@ -99,14 +98,12 @@ class MRIAnimator(object):
         slice_range = np.linspace(data.shape[2],0, endpoint=True, dtype=int)
         title = mlab.title(self.title, size = 8, color=(0,0,0))
         title.property.font_size = 8
-        mlab.orientation_axes()
-        #mlab.savefg('test11.pdf',figure=f)
         
         
         return f, image_source, image_plane, slice_range
     
     @mlab.show
-    @mlab.animate(delay=350, ui=True)
+    @mlab.animate(delay=250, ui=True)
     def _animate_volume(self, data, n):
         f, image_source, image_plane, slice_range = self.generate_scene(data, n)
         
@@ -140,10 +137,7 @@ class MRIAnimator(object):
             for i in zz1:
                 image_plane.ipw.slice_index = i
                 mm.animation_step()
-                file_name_pdf = self.missing_file_fig_id  +  '_' + str(i) + '_' +  str('.pdf')
-                #mm.scene.save(file_name_pdf) 
                 
-            #mm.scene.save('test10.pdf')   
             file_name = self.missing_file_fig_id  + str('.tiff')
             mm.scene.save_tiff(file_name)
             file_items = self.collect_files()
