@@ -46,11 +46,11 @@ def ellipsoid_masker(x_r, y_r, z_r, x0, y0, z0, img):
     brain_mask = compute_background_mask(img)
     # build a mesh grid as per original image
     x_min, x_max, y_min, y_max, z_min, z_max = get_box_coord(img)
-    print "Box Coordinates: " + "; x_min: " + str(x_min) + "; x_max: "  + str(x_max) + "; y_min: " + str(y_min) +  "; y_max: " + str(y_max) + "; z_min " + str(z_min) + "; z_max: "  + str(z_max)
+    print ("Box Coordinates: " + "; x_min: " + str(x_min) + "; x_max: "  + str(x_max) + "; y_min: " + str(y_min) +  "; y_max: " + str(y_max) + "; z_min " + str(z_min) + "; z_max: "  + str(z_max))
     x_spacing = abs(img.affine[0,0])
     y_spacing = abs(img.affine[1,1])
     z_spacing = abs(img.affine[2,2])
-    print "X-spacing: " +str(x_spacing) + "; Y-spacing: " + str(y_spacing) + "; Z-spacing: " + str(z_spacing)
+    print ("X-spacing: " +str(x_spacing) + "; Y-spacing: " + str(y_spacing) + "; Z-spacing: " + str(z_spacing))
     
      # build a mesh grid as per original image
     x, y, z = np.mgrid[x_min:x_max+1:x_spacing, y_min:y_max+1:y_spacing, z_min:z_max+1:z_spacing]
@@ -87,7 +87,7 @@ def get_data(img):
 
 def create_ellipsoid_mask(x0, y0, z0, x_r, y_r, z_r, target_img, mask_path):
     image_masked_by_ellipsoid = create_image_with_ellipse_mask(x_r, y_r, z_r, x0, y0, z0, target_img)
-    print "Saving Ellpse Mask @: " + str(mask_path)
+    print ("Saving Ellpse Mask @: " + str(mask_path))
     nib.save(image_masked_by_ellipsoid,mask_path)
     mask_path = mask_path + ".nii"
     #plot_ellipse_mask(mask_path,x0, y0, z0, x_r, y_r, z_r)

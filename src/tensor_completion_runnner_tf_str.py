@@ -179,7 +179,7 @@ def complete_random_2D_by_tr_size():
         for i in range (0, n, 1):
                 for el_key in sorted(volumes_label):
                     el_value = volumes_label[el_key]
-                    print "Processing Volume Size: " + str(el_key) + "; Volume Value: " + str(el_value)
+                    print ("Processing Volume Size: " + str(el_key) + "; Volume Value: " + str(el_value))
                     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
                     meta.create_solution_file_by_mr(item, el_key)
                     current_runner = ct.TensorCompletionStructural(subject_scan_path, item, 2, 1, meta.logger, meta, x0, y0, z0, el_value[0], el_value[1], el_value[2])
@@ -220,7 +220,7 @@ def complete_random_3D_by_tr_size():
         for i in range (0, n, 1):
                 for el_key in sorted(volumes_label):
                     el_value = volumes_label[el_key]
-                    print "Processing Volume Size: " + str(el_key) + "; Volume Value: " + str(el_value)
+                    print ("Processing Volume Size: " + str(el_key) + "; Volume Value: " + str(el_value))
                     solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
                     meta.create_solution_file_by_mr(item, el_key)
                     current_runner = ct.TensorCompletionStructural(subject_scan_path, item, 3, 1, meta.logger, meta, x0, y0, z0, el_value[0], el_value[1], el_value[2])
@@ -228,9 +228,9 @@ def complete_random_3D_by_tr_size():
     
         
 def complete_random_4D_by_tr_size():
-    subject_scan_path = du.get_full_path_subject1()
+    subject_scan_path = du.get_full_path_subject2()
     meta = mdt.Metadata('structural', 4)
-    root_dir = config.get('log', 'scratch.dir4Dstr')
+    root_dir = config.get('log', 'scratch.dir4D.subject2')
     
     observed_ratio_list = [0.95, 0.9,0.85,0.8,0.75,0.7]
     
@@ -250,22 +250,63 @@ def complete_random_4D_by_tr_size():
     
     volumes_label = {}
     #volumes_label['size0'] = (7,10,8)
-    volumes_label['size1'] = (25,20,20)
+    #volumes_label['size1'] = (8,10,8)
     #volumes_label['size2'] = (9,10,8)
     #volumes_label['size3'] = (10,10,8)
-    #volumes_label['size4'] = (11,10,8)
-    #volumes_label['size5'] = (12,10,8)
+    volumes_label['size4'] = (11,10,8)
+    volumes_label['size5'] = (12,10,8)
+    
+    #not good result for size 5
     
     n= 1
+    
+    observed_ratio_list = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7]
+    observed_ratio_list = [0.75]
+    #observed_ratio_list = [0.9]
+    ranks = {}
+    
+    #ranks[0.95] = 250
+    #ranks[0.9] = 237
+    #ranks[0.85] = 220
+    #ranks[0.8] = 220
+    #ranks[0.75] = 215
+    #ranks[0.7] = 210
+    #ranks[0.6] = 170
+    #ranks[0.5] = 130
+    #ranks[0.4] = 120
+    #ranks[0.4] = [1 ,53 ,120, 150, 1]
+    #ranks[0.3] = 115
+    #ranks[0.25] = 110
+    #ranks[0.2] = 105
+    #ranks[0.15] = 90
+    #ranks[0.1] = 81
+
+    
+    ranks[0.9] = 75
+    ranks[0.85] = 95
+    ranks[0.8] = 85
+    ranks[0.75] = 100
+    ranks[0.7] = 75
+    ranks[0.6] = 75
+    ranks[0.5] = 75
+    ranks[0.4] = 75
+    #ranks[0.4] = [1 ,53 ,120, 150, 1]
+    ranks[0.3] = 75
+    ranks[0.25] = 75
+    ranks[0.2] = 75
+    ranks[0.15] = 75
+    ranks[0.1] = 75
+    
     
     for item in observed_ratio_list:
         for i in range (0, n, 1):
             for el_key in sorted(volumes_label):
                 el_value = volumes_label[el_key]
-                print "Processing Volume Size: " + str(el_key) + "; Volume Value: " + str(el_value)
+                print ("Processing Volume Size: " + str(el_key) + "; Volume Value: " + str(el_value))
                 solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
                 meta.create_solution_file_by_mr(item, el_key)
-                current_runner = ct.TensorCompletionStructural(subject_scan_path, item, 4, 1, meta.logger, meta, x0, y0, z0, el_value[0], el_value[1], el_value[2])
+                print (subject_scan_path)
+                current_runner = ct.TensorCompletionStructural(subject_scan_path, item, 4, 1, meta.logger, meta, x0, y0, z0, el_value[0], el_value[1], el_value[2], ranks[item])
                 current_runner.complete()
         
 

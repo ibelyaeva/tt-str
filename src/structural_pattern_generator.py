@@ -28,8 +28,9 @@ from random import seed
 from random import sample
 np.random.seed(0)
 
+
 def generate_structural_missing_pattern(x0,y0,z0, x_r, y_r, z_r,frames_count, folder):
-    subject_scan_path = du.get_full_path_subject1()
+    subject_scan_path = du.get_full_path_subject2()
 
     n = 0
     
@@ -38,7 +39,7 @@ def generate_structural_missing_pattern(x0,y0,z0, x_r, y_r, z_r,frames_count, fo
     corrupted_volumes_list = []
     corrupted_volumes_list_scan_numbers = []
     
-    for i in xrange(frames_count):
+    for i in range(frames_count):
         target_img = image.index_img(subject_scan_path,i)
         image_masked_by_ellipsoid = elpm.create_ellipsoid_mask(x0, y0, z0, x_r, y_r, z_r, target_img, masked_img_file_path)
         
@@ -55,12 +56,12 @@ def generate_structural_missing_pattern(x0,y0,z0, x_r, y_r, z_r,frames_count, fo
     
     volumes_list = []
     for img in image.iter_img(subject_scan_path):
-        print "Volume Index: " + str(counter)
+        print ("Volume Index: " + str(counter))
         if counter in corrupted_volumes_list_scan_numbers:
-            print "Adding corrupted volume to the list " + str(counter)
+            print ("Adding corrupted volume to the list " + str(counter))
             volumes_list.append(corrupted_volumes_list[counter])
         else:
-            print "Adding normal volume to the list " + str(counter)
+            print ("Adding normal volume to the list " + str(counter))
             volumes_list.append(img)
         counter = counter + 1
         
@@ -71,7 +72,7 @@ def generate_structural_missing_pattern(x0,y0,z0, x_r, y_r, z_r,frames_count, fo
     return x_corr_img
 
 def generate_structural_missing_pattern_random_frame(x0,y0,z0, x_r, y_r, z_r,frames_count, folder, shape):
-    subject_scan_path = du.get_full_path_subject1()
+    subject_scan_path = du.get_full_path_subject2()
 
     n = 0
     
@@ -102,12 +103,12 @@ def generate_structural_missing_pattern_random_frame(x0,y0,z0, x_r, y_r, z_r,fra
     
     volumes_list = []
     for img in image.iter_img(subject_scan_path):
-        print "Volume Index: " + str(counter)
+        print ("Volume Index: " + str(counter))
         if counter in corrupted_volumes_list_scan_numbers:
-            print "Adding corrupted volume to the list " + str(counter)
+            print ("Adding corrupted volume to the list " + str(counter))
             volumes_list.append(corrupted_volumes[counter])
         else:
-            print "Adding normal volume to the list " + str(counter)
+            print ("Adding normal volume to the list " + str(counter))
             volumes_list.append(img)
         counter = counter + 1
         
@@ -121,7 +122,7 @@ def generate_structural_missing_pattern_random_frame(x0,y0,z0, x_r, y_r, z_r,fra
 def random_gen(high, random_count):
     seed(1)
     # prepare a sequence
-    sequence = [i for i in xrange(high)]
+    sequence = [i for i in range(high)]
     print(sequence)
     subset = sample(sequence,random_count)
     return subset

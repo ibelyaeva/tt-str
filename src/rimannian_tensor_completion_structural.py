@@ -1,6 +1,7 @@
 import texfig
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import numpy as np
 import t3f
 tf.set_random_seed(0)
@@ -195,7 +196,7 @@ class RiemannianTensorCompletionStructural(object):
         # algorithm constants
         self.counter = tf.get_variable('counter', initializer=0)
         self.one_tf = tf.constant(1)
-        self.zero_point1_tf = tf.constant(0.1)
+        self.zero_point1_tf = tf.constant(0.7)
         
         self.backtrack_const_tf = tf.constant(self.backtrack_const)
         
@@ -346,7 +347,7 @@ class RiemannianTensorCompletionStructural(object):
             
         gradnorm_val, alpha_val, eta_op_0_val, cost_val, cost_new_val, eta_norm_val, tsc_score_val, _, _ = self.sess.run([self.gradnorm_omega_0, self.alpha_0, self.eta_op_0, self.cost,
                                                                                                                       self.cost_new, self.eta_norm, self.completion_score, self.train_step_0.op, self.eta_norm_init_op.op])
-        print gradnorm_val, alpha_val, cost_val, cost_new_val, eta_norm_val, tsc_score_val
+        print (gradnorm_val, alpha_val, cost_val, cost_new_val, eta_norm_val, tsc_score_val)
         self.logger.info("tsc_score_0:" + str(tsc_score_val))
         
         #cost history
@@ -357,21 +358,22 @@ class RiemannianTensorCompletionStructural(object):
         self.tcs_cost_history.append(tsc_score_val)
         
         #train history
-        self.train_cost_history.append(gradnorm_val)
+        train_cost = min(1.0, (np.sqrt(2*cost_val)) / self.norm_sparse_observation)
+        self.train_cost_history.append(train_cost)
         
         #Compute x_hat at iteration 0
         self.x_hat = mt.reconstruct2(self.sess.run(t3f.full(self.X)), self.ground_truth, self.mask_indices)
         self.x_hat_img = mt.reconstruct_image_affine_d(self.ground_truth_img, self.x_hat, self.d, self.tensor_shape)
         
         #tcs z score history        
-        tcs_z_score = tu.tsc_z_score(self.x_hat,self.ground_truth, self.ten_ones, self.mask_indices, self.z_scored_mask)
+        tcs_z_score = min(1.0,tu.tsc_z_score(self.x_hat,self.ground_truth, self.ten_ones, self.mask_indices, self.z_scored_mask))
         self.tcs_z_scored_history.append(tcs_z_score)
         
         self.logger.info("tcs_z_score 0:" + str(tcs_z_score))
         
         #rse cost history
         rse_cost = mt.relative_error(self.x_hat,self.ground_truth)
-        self.rse_cost_history.append(rse_cost)
+        self.rse_cost_history.append(min(1.0,rse_cost))
         self.logger.info("rse cost 0:" + str( rse_cost))
         
         self.save_solution_scans_iteration(self.suffix, self.scan_mr_iteration_folder, 0)
@@ -390,11 +392,11 @@ class RiemannianTensorCompletionStructural(object):
                            self.eta_norm_update_op.op, self.cost_new_op.op, self.train_new_step.op,
                            self.tsc_score_update_op.op, self.eta_update_op.op, self.grad_update_op.op])
     
-            print "alpha_val: " + str(alpha_val)
-            print "theta_val: " + str(theta_val)
-            print "inprod_grad_eta_val: " + str(inprod_grad_eta_val)
-            print "rim_grad_norm: " + str(riemannian_grad_norm_val)
-            print "eta_norm_val: " + str(eta_norm_val) 
+            print ("alpha_val: " + str(alpha_val))
+            print ("theta_val: " + str(theta_val))
+            print ("inprod_grad_eta_val: " + str(inprod_grad_eta_val))
+            print ("rim_grad_norm: " + str(riemannian_grad_norm_val))
+            print ("eta_norm_val: " + str(eta_norm_val))
             
             lr = alpha_val
             cost_prev_value = cost_val
@@ -407,12 +409,13 @@ class RiemannianTensorCompletionStructural(object):
             tsc_score_old = self.tcs_cost_history[i - 1]
             tcs_z_score_old = self.tcs_z_scored_history[i-1]
             rse_cost_old = self.rse_cost_history[i-1]
+            train_cost_old = self.train_cost_history[i - 1]
             
             self.x_hat = mt.reconstruct2(self.sess.run(t3f.full(self.X_new)), self.ground_truth, self.mask_indices)
             self.x_hat_img = mt.reconstruct_image_affine_d(self.ground_truth_img, self.x_hat, self.d, self.tensor_shape)
             
-            tsc_score_new = cst.tsc(self.x_hat, self.ground_truth, self.ten_ones, self.mask_indices).astype('float32')
-            tcs_z_score = tu.tsc_z_score(self.x_hat,self.ground_truth, self.ten_ones, self.mask_indices, self.z_scored_mask)
+            tsc_score_new = min(1.0, cst.tsc(self.x_hat, self.ground_truth, self.ten_ones, self.mask_indices).astype('float32'))
+            tcs_z_score = min(1.0, tu.tsc_z_score(self.x_hat,self.ground_truth, self.ten_ones, self.mask_indices, self.z_scored_mask))
 
             self.logger.info("TSC Score New: " + str(tsc_score_new))
             self.logger.info("TSC Score Old: " + str(tsc_score_old))
@@ -479,21 +482,26 @@ class RiemannianTensorCompletionStructural(object):
                 self.x_hat_img = mt.reconstruct_image_affine_d(self.ground_truth_img, self.x_hat, self.d, self.tensor_shape)
                 
                 # recompute tcs_score for accepted x_hat
-                tsc_score_new = cst.tsc(self.x_hat, self.ground_truth, self.ten_ones, self.mask_indices).astype('float32')
+                tsc_score_new = min(1.0, cst.tsc(self.x_hat, self.ground_truth, self.ten_ones, self.mask_indices).astype('float32'))
                 self.tcs_cost_history.append(tsc_score_new)
                 self.cost_history.append(cost_new_value)
                 
                 # recompute tcs_z_score for accepted x_hat
-                tcs_z_score = tu.tsc_z_score(self.x_hat,self.ground_truth, self.ten_ones, self.mask_indices, self.z_scored_mask)
+                tcs_z_score = min(1.0, tu.tsc_z_score(self.x_hat,self.ground_truth, self.ten_ones, self.mask_indices, self.z_scored_mask))
                 self.tcs_z_scored_history.append(tcs_z_score)
                 
-                rse_cost = mt.relative_error(self.x_hat,self.ground_truth)
+                rse_cost = min(1.0, mt.relative_error(self.x_hat,self.ground_truth))
                 self.rse_cost_history.append(rse_cost)
+                
+                train_cost = min(1.0,(np.sqrt(2*cost_new_value) / self.norm_sparse_observation))
+                self.train_cost_history.append(train_cost)
+                self.logger.info("train cost: " + str(train_cost))
                 
                 self.logger.info("Accepted TCS Score: " + str(tsc_score_new) + "; Iteration #: " + str(i))
                 self.logger.info("Accepted TCS Z Score: " + str(tcs_z_score) + "; Iteration #: " + str(i))
-                self.logger.info("Accepted Training Cost: " + str(cost_new_value) + "; Iteration #: " + str(i))
+                self.logger.info("Accepted Cost: " + str(cost_new_value) + "; Iteration #: " + str(i))
                 self.logger.info("Accepted RSE Cost: " + str(rse_cost) + "; Iteration #: " + str(i))
+                self.logger.info("Accepted Training Cost: " + str(train_cost) + "; Iteration #: " + str(i))
             
             else:
                 self.logger.info("Reject Step: not updating X: initial cost: " + str(cost_prev_value) + "; New Cost: " + str(cost_new_value))
@@ -501,17 +509,15 @@ class RiemannianTensorCompletionStructural(object):
                 self.cost_history.append(cost_prev_value)
                 self.tcs_z_scored_history.append(tcs_z_score_old)
                 self.rse_cost_history.append(rse_cost_old)
+                self.train_cost_history.append(train_cost_old)
                 
                 self.logger.info("Saving previous TCS Score: " + str(tsc_score_old) + "; Iteration #: " + str(i))
                 self.logger.info("Saving previous TCS Z Score: " + str(tcs_z_score_old) + "; Iteration #: " + str(i))
                 self.logger.info("Saving previous Cost: " + str(cost_prev_value) + "; Iteration #: " + str(i))  
                 self.logger.info("Saving previous RSE Cost: " + str(rse_cost_old) + "; Iteration #: " + str(i))   
+                self.logger.info("Saving previous Training Cost: " + str(train_cost_old) + "; Iteration #: " + str(i))
+          
         
-            # train cost history
-            self.train_cost_history.append(gradnorm_val)
-            
-            self.logger.info("Train Cost : " + str(self.train_cost_history[i]) + "; Iteration #: " + str(i))
-            
             self.save_solution_scans_iteration(self.suffix, self.scan_mr_iteration_folder, i)
             self.logger.info("Len TSC Score History: " + str(len(self.tcs_cost_history)))
             self.save_cost_history()
@@ -520,10 +526,12 @@ class RiemannianTensorCompletionStructural(object):
             
             if i > 1:
                 diff_train = np.abs(self.train_cost_history[i] - self.train_cost_history[i - 1]) / np.abs(self.train_cost_history[i])
+                diff_cost = np.abs(self.cost_history[i] - self.cost_history[i - 1]) / np.abs(self.cost_history[i])
                 print (F_v, i, gradnorm_val, diff_train, alpha_val, theta_val, beta_val, cost_val, cost_new_val)
                 
                 self.logger.info("gradnorm : " + str(gradnorm_val) +
-                                    "; diff train: " + str(diff_train) +
+                                    "; diff train: " + str(diff_train) 
+                                    + "; diff cost: " + str(diff_cost) +
                                      "; alpha" + str(alpha_val) + 
                                      "; theta = " + str(theta_val) +
                                      "; cost : " + str(cost_val) + 
@@ -532,6 +540,10 @@ class RiemannianTensorCompletionStructural(object):
                    
                 if diff_train <= self.train_epsilon:
                     self.logger.info("Optimization Completed. Breaking after " + str(i) + " iterations" + "; Reason Relative Tolerance of Training Iterations Exceeded Trheshold: " + str(self.train_epsilon))
+                    break
+                
+                if diff_cost <= self.train_epsilon:
+                    self.logger.info("Optimization Completed. Breaking after " + str(i) + " iterations" + "; Reason Relative Tolerance of Cost Iterations Exceeded Trheshold: " + str(self.train_epsilon))
                     break
             else:
                 print (F_v, i, gradnorm_val, alpha_val, theta_val, beta_val, cost_val, cost_new_val)
@@ -617,9 +629,13 @@ class RiemannianTensorCompletionStructural(object):
         self.logger.info("Iteration: " + str(iteration))
         
         # Commenting out saving scan per iteration to save disk space
-        x_true_path = os.path.join(folder,"x_true_img_" + str(suffix) + '_' + str(iteration))
-        x_hat_path = os.path.join(folder,"x_hat_img_" + str(suffix) + '_' + str(iteration))
-        x_miss_path = os.path.join(folder,"x_miss_img_" + str(suffix) + '_' + str(iteration))
+        #x_true_path = os.path.join(folder,"x_true_img_" + str(suffix) + '_' + str(iteration))
+        #x_hat_path = os.path.join(folder,"x_hat_img_" + str(suffix) + '_' + str(iteration))
+        #x_miss_path = os.path.join(folder,"x_miss_img_" + str(suffix) + '_' + str(iteration))
+        
+        x_true_path = os.path.join(folder,"x_true_img_" + str(suffix))
+        x_hat_path = os.path.join(folder,"x_hat_img_" + str(suffix))
+        x_miss_path = os.path.join(folder,"x_miss_img_" + str(suffix))
         
         #x_true_path = os.path.join(folder,"x_true_img")
         #x_hat_path = os.path.join(folder,"x_hat_img")
@@ -640,10 +656,10 @@ class RiemannianTensorCompletionStructural(object):
         self.effective_roi_volume = self.ellipsoid_mask.effective_roi_volume
             
         # first ts
-        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.first_ts),
-                        image.index_img(self.x_hat_img,self.first_ts), image.index_img(self.x_miss_img, self.first_ts), self.title + " Iteration: " + str(iteration),
+        mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),
+                        image.index_img(self.x_hat_img,self.middle_ts1), image.index_img(self.x_miss_img, self.middle_ts1), self.title + " Iteration: " + str(iteration),
                         self.tcs_cost_history[iteration], self.observed_ratio, self.tcs_cost_history[iteration], self.tcs_z_scored_history[iteration], 2, 
-                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=self.first_ts)
+                       self.effective_roi_volume, coord=self.coords, coord_tuple = self.coords_tuple, folder=self.images_mr_folder_iteration, iteration=iteration, time=-1)
         
         # second ts
         #mrd.draw_original_vs_reconstructed_rim_z_score_str(image.index_img(self.ground_truth_img, self.middle_ts1),
@@ -932,12 +948,13 @@ class RiemannianTensorCompletionStructural(object):
         row['scan_final_path'] = self.scan_mr_folder
         row['scan_iteration_path'] = self.scan_mr_iteration_folder
         row['metadata_path'] = metadata_path
-            
-        with open(self.meta.global_solution_path,"ab") as global_solution_file:
-            writer  = csv.DictWriter(global_solution_file, fieldnames=self.meta.col_names)
-            writer.writerow(row)
-            
-        global_solution_file.close()
+        
+        outfile = open(self.meta.global_solution_path,'a')
+        writer= csv.DictWriter(outfile, fieldnames=self.meta.col_names)
+        writer.writerow(row)   
+        outfile.close()
+        
+        return
             
         
         

@@ -1,4 +1,5 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 import numpy as np
 
 tf.set_random_seed(0)
@@ -15,7 +16,7 @@ import ellipsoid_mask as elp
 
 class TensorCompletionStructural(object):
     
-    def __init__(self, data_path, observed_ratio, d, n, logger, meta, x0, y0, z0, x_r, y_r, z_r, z_score = 2):
+    def __init__(self, data_path, observed_ratio, d, n, logger, meta, x0, y0, z0, x_r, y_r, z_r, rank, z_score = 2):
         self.observed_ratio = observed_ratio
         self.missing_ratio = 1.0 - self.observed_ratio
         self.d = d
@@ -24,6 +25,7 @@ class TensorCompletionStructural(object):
         self.meta = meta
         self.z_score = z_score
         
+        self.max_tt_rank = rank
         self.x0 = x0
         self.y0 = y0
         self.z0 = z0
@@ -47,8 +49,7 @@ class TensorCompletionStructural(object):
         self.logger.info("D = " + str(self.d) + "; Original Shape: " + str(self.x_true_data.shape) + "; Target Shape: " + str(self.target_shape))
         
         self.tensor_shape = tu.get_tensor_shape(self.x_true_data)
-        self.max_tt_rank = tu.get_max_rank(self.x_true_reshaped_rank)
-        self.max_tt_rank = 75
+        #self.max_tt_rank = tu.get_max_rank(self.x_true_reshaped_rank)
         
         self.logger.info("Tensor Shape: " + str(self.tensor_shape) + "; Max Rank: " + str(self.max_tt_rank))
              
@@ -77,7 +78,7 @@ class TensorCompletionStructural(object):
         self.norm_sparse_observation = np.linalg.norm(self.sparse_observation)
         
         self.epsilon = 1e-5
-        self.train_epsilon = 1e-5
+        self.train_epsilon = 1e-4
         self.backtrack_const = 1e-4
         
         # related z_score structures

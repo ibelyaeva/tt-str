@@ -110,12 +110,12 @@ class Metadata(object):
         self.set_solution_label(solution_label)
         self.global_solution_path = os.path.join(self.root_dir, 'global_solution_'+ str(self.n) + 'D_' + self.pattern + '_' + 'mr' + str(self.suffix) + '_' +self.solution_label + '.csv')
         if not os.path.exists(self.global_solution_path):
-            with open(self.global_solution_path,"ab") as global_solution_file:
-                writer  = csv.DictWriter(global_solution_file, fieldnames=self.col_names)
-                writer.writeheader()
-                
-            
-            global_solution_file.close()
+            outfile = open(self.global_solution_path,'a')
+            writer= csv.DictWriter(outfile, fieldnames=self.col_names)
+            writer.writeheader()
+            outfile.close()
+        
+        return
             
         
     def set_solution_label(self, solution_label):

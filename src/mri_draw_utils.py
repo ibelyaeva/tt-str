@@ -24,6 +24,9 @@ import data_util as du
 from matplotlib.offsetbox import (TextArea, DrawingArea, OffsetImage,
                                   AnnotationBbox)
 
+from matplotlib import rc
+rc("text", usetex=False)
+
 PROJECT_DIR  = "/work/pl/sch/analysis/scripts"
 PROJECT_ROOT_DIR = "."
 DATA_DIR = "data"
@@ -385,7 +388,7 @@ def draw_original_vs_reconstructed_rim_z_score(x_true_img, x_hat_img, x_miss_img
     recov_ax = fig.add_subplot(grid[2, 0], sharex=main_ax)
     recov_ax.set_xlabel('(c)', color=bg_color)
     
-    recov_ax.set_title('Completed. ' + " " + str("TCS: ") + tsc_str + " TCS(Z_Score >" + z_score_str + "): "  + tsc_z_score_str, color=fg_color, fontweight='normal', fontsize=8)
+    recov_ax.set_title('Completed. ' + " " + str("TCS: ") + tsc_str + " TCS(Z_Score " + z_score_str + "): "  + tsc_z_score_str, color=fg_color, fontweight='normal', fontsize=8)
     
     recovered_image = plotting.plot_epi(x_hat_img, annotate=False, bg_img=None,black_bg=True, figure= fig, axes = recov_ax, cmap='jet', cut_coords=coord)       
     
@@ -465,7 +468,7 @@ def draw_original_vs_reconstructed_rim_z_score_str(x_true_img, x_hat_img, x_miss
     recov_ax = fig.add_subplot(grid[2, 0], sharex=main_ax)
     recov_ax.set_xlabel('(c)', color=bg_color)
     
-    recov_ax.set_title('Completed. ' + " " + str("TCS: ") + tsc_str + " TCS(Z_Score >" + z_score_str + "): "  + tsc_z_score_str, color=fg_color, fontweight='normal', fontsize=8)
+    recov_ax.set_title('Completed. ' + " " + str("TCS: ") + tsc_str + " TCS(Z_Score " + z_score_str + "): "  + tsc_z_score_str, color=fg_color, fontweight='normal', fontsize=8)
     
     recovered_image = plotting.plot_epi(x_hat_img, annotate=True, draw_cross=False, bg_img=None,black_bg=True, figure= fig, axes = recov_ax, cmap='jet', cut_coords=coord)       
     
@@ -901,7 +904,7 @@ def draw_spikes(path_func, plot_title, folder, spike_thre = 4.):
     rows = int(rows)*2
     cols = int(cols)
        
-    print rows, cols
+    print (rows, cols)
     fig = plt.figure(frameon = False, figsize=(int(7 * cols), int(5 * rows)))
     
     if plot_title:

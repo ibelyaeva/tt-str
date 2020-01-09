@@ -27,6 +27,18 @@ ellipsoid_mask1_path = "size_20_7_15.nii"
 ellipsoid_mask2_path = "size_20_11_25.nii"
 ellipsoid_mask3_path = "size_35_20_25.nii"
 
+def get_folder_subject2():
+    folder_path_subject2 = "/pl/mlsp/data/cobre/cobreRST/control/M87101227"
+    return folder_path_subject2
+
+def get_path_subject2():
+    data_path_subject2   = "swaAMAYER+cobre01_63001+M87101227+20090414at085117+RSTpre_V01_R01+CM.nii"
+    return data_path_subject2
+
+def get_full_path_subject2():
+    subject_abs_path  = os.path.join(get_folder_subject2(), get_path_subject2())
+    return subject_abs_path
+
 def get_folder_subject1():
     folder_path_subject1 = "/work/pl/sch/analysis/data/COBRE001"
     return folder_path_subject1
