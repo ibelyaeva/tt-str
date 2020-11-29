@@ -27,6 +27,28 @@ ellipsoid_mask1_path = "size_20_7_15.nii"
 ellipsoid_mask2_path = "size_20_11_25.nii"
 ellipsoid_mask3_path = "size_35_20_25.nii"
 
+def get_parent_name(file_path):
+    current_dir_name = os.path.split(os.path.dirname(file_path))[1]
+    return current_dir_name
+
+def get_subjects(root_dir):
+    subject_list = []
+    for root,d_names,f_names in os.walk(root_dir):
+        for f in f_names:
+            if f.startswith("swa"):
+                file_path = os.path.join(root, f)
+                subject_list.append(file_path)
+    return subject_list
+
+def get_subjects_with_prefix(root_dir, prefix):
+    subject_list = []
+    for root,d_names,f_names in os.walk(root_dir):
+        for f in f_names:
+            if f.startswith(prefix):
+                file_path = os.path.join(root, f)
+                subject_list.append(file_path)
+    return subject_list
+
 def get_folder_subject2():
     folder_path_subject2 = "/pl/mlsp/data/cobre/cobreRST/control/M87101227"
     return folder_path_subject2

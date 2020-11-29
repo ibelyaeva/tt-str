@@ -83,7 +83,7 @@ class RiemannianTensorCompletionStructural(object):
         self.logger.info(self.scan_mr_iteration_folder)
         self.logger.info(self.suffix)
         self.get_draw_timepoints()
-        self.save_medata()
+        #self.save_medata()
                   
     def init_variables(self):
         
@@ -188,10 +188,10 @@ class RiemannianTensorCompletionStructural(object):
         self.tf_ones = tf.cast(self.tf_ones, tf.float32)
         
         # tt_zeros
-        if self.d == 2 or self.d == 3:
-            self.tt_zeros = initializers.tensor_zeros(list(self.target_shape))
-        else:
-            self.tt_zeros = initializers.tensor_zeros(list(self.tensor_shape))
+        #if self.d == 2 or self.d == 3:
+            #self.tt_zeros = initializers.tensor_zeros(list(self.target_shape))
+        #else:
+            #self.tt_zeros = initializers.tensor_zeros(list(self.tensor_shape))
         
         # algorithm constants
         self.counter = tf.get_variable('counter', initializer=0)
@@ -383,8 +383,8 @@ class RiemannianTensorCompletionStructural(object):
         i = 0
         cost_nan = False
         self.logger.info("Epsilon: " + str(self.epsilon))
-        while gradnorm_val > self.epsilon: 
-        #for k in range(20):
+        #while gradnorm_val > self.epsilon: 
+        for k in range(20):
             i = i + 1
             F_v, gradnorm_val, alpha_val, theta_val, beta_val, cost_new_val, cost_val, tsc_score_val, eta_norm_val, inprod_grad_eta_val, riemannian_grad_norm_val, _, _, _, _, _, _ = self.sess.run([self.loss, self.gradnorm_omega, self.alpha,
                            self.theta, self.beta, self.cost_new, self.cost,
@@ -898,6 +898,8 @@ class RiemannianTensorCompletionStructural(object):
         md_output['tr2'] = self.middle_ts1
         md_output['tr3'] = self.middle_ts2
         md_output['tr4'] = self.max_ts
+        
+        print ("STR =" + str(md_output))
         metadata_df = pd.DataFrame(md_output, index=indices)
         fig_id = 'metadata' + '_' + self.suffix
         mrd.save_csv_by_path(metadata_df, self.meta.images_metadata_folder, fig_id) 

@@ -228,13 +228,13 @@ def complete_random_3D_by_tr_size():
     
         
 def complete_random_4D_by_tr_size():
-    subject_scan_path = du.get_full_path_subject2()
+    subject_scan_path2 = du.get_full_path_subject2()
     meta = mdt.Metadata('structural', 4)
-    root_dir = config.get('log', 'scratch.dir4D.subject2')
+    root_dir = config.get('log', 'scratch.dir4Dmultistrsize5')
     
     observed_ratio_list = [0.95, 0.9,0.85,0.8,0.75,0.7]
     
-    observed_ratio_list = [0.98]
+    observed_ratio_list = [0.95]
     
     # ellipse center
     x0, y0, z0 = (2,32,22)
@@ -253,7 +253,7 @@ def complete_random_4D_by_tr_size():
     #volumes_label['size1'] = (8,10,8)
     #volumes_label['size2'] = (9,10,8)
     #volumes_label['size3'] = (10,10,8)
-    volumes_label['size4'] = (11,10,8)
+    #volumes_label['size4'] = (11,10,8)
     volumes_label['size5'] = (12,10,8)
     
     #not good result for size 5
@@ -261,7 +261,7 @@ def complete_random_4D_by_tr_size():
     n= 1
     
     observed_ratio_list = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7]
-    observed_ratio_list = [0.75]
+    observed_ratio_list = [0.95]
     #observed_ratio_list = [0.9]
     ranks = {}
     
@@ -281,7 +281,7 @@ def complete_random_4D_by_tr_size():
     #ranks[0.15] = 90
     #ranks[0.1] = 81
 
-    
+    ranks[0.95] = [1 ,46 ,46, 46, 1]
     ranks[0.9] = 75
     ranks[0.85] = 95
     ranks[0.8] = 85
@@ -297,17 +297,29 @@ def complete_random_4D_by_tr_size():
     ranks[0.15] = 75
     ranks[0.1] = 75
     
+    subjects_root_dir = "/pl/mlsp/data/cobre/subjects/"
+    subject_list = du.get_subjects(subjects_root_dir)
     
-    for item in observed_ratio_list:
-        for i in range (0, n, 1):
-            for el_key in sorted(volumes_label):
-                el_value = volumes_label[el_key]
-                print ("Processing Volume Size: " + str(el_key) + "; Volume Value: " + str(el_value))
-                solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
-                meta.create_solution_file_by_mr(item, el_key)
-                print (subject_scan_path)
-                current_runner = ct.TensorCompletionStructural(subject_scan_path, item, 4, 1, meta.logger, meta, x0, y0, z0, el_value[0], el_value[1], el_value[2], ranks[item])
-                current_runner.complete()
+    
+    subject_count = 0
+    for subject_scan_path in subject_list:
+        print(subject_scan_path)
+        subject_count = subject_count + 1
+        if subject_count > 5:
+            break
+        print ("Subject Count = " + str(subject_count))
+        print("Processing Subject: " + str(subject_scan_path))
+    
+        for item in observed_ratio_list:
+            for i in range (0, n, 1):
+                for el_key in sorted(volumes_label):
+                    el_value = volumes_label[el_key]
+                    print ("Processing Volume Size: " + str(el_key) + "; Volume Value: " + str(el_value))
+                    solution_dir, movies_folder, images_folder, results_folder, reports_folder, scans_folder, scans_folder_final, scans_folder_iteration = meta.init_meta_data(root_dir)
+                    meta.create_solution_file_by_mr(item, el_key)
+                    print (subject_scan_path)
+                    current_runner = ct.TensorCompletionStructural(subject_scan_path, item, 4, 1, meta.logger, meta, x0, y0, z0, el_value[0], el_value[1], el_value[2], ranks[item])
+                    current_runner.complete()
         
 
 

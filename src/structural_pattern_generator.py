@@ -71,8 +71,8 @@ def generate_structural_missing_pattern(x0,y0,z0, x_r, y_r, z_r,frames_count, fo
     #print ("Effective Missing Ratio: " + str(observed_ratio))
     return x_corr_img
 
-def generate_structural_missing_pattern_random_frame(x0,y0,z0, x_r, y_r, z_r,frames_count, folder, shape):
-    subject_scan_path = du.get_full_path_subject2()
+def generate_structural_missing_pattern_random_frame(x0,y0,z0, x_r, y_r, z_r,frames_count, folder, shape, subject_path):
+    subject_scan_path = subject_path
 
     n = 0
     

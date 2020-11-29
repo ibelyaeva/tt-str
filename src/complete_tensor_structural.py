@@ -33,8 +33,10 @@ class TensorCompletionStructural(object):
         self.x_r = x_r
         self.y_r = y_r
         self.z_r = z_r 
+        
+        self.data_path = data_path
         self.init_cost_history()
-        self.init_dataset(data_path)
+        self.init_dataset(data_path) 
         
     def init_dataset(self, path):
         self.x_true_img = mt.read_image_abs_path(path)
@@ -99,7 +101,7 @@ class TensorCompletionStructural(object):
         self.x_mask_img, self.random_ts = stp.generate_structural_missing_pattern_random_frame(self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, 
                                                                   self.ellipsoid_mask.z0, self.ellipsoid_mask.x_r, 
                                                                   self.ellipsoid_mask.y_r, self.ellipsoid_mask.z_r,
-                                                                             self.time_point_count, self.ellipsoid_mask.mask_path, self.target_shape)
+                                                                             self.time_point_count, self.ellipsoid_mask.mask_path, self.target_shape, self.data_path)
         
         coords = [self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, self.ellipsoid_mask.z0]
         coords_tuple = [(self.ellipsoid_mask.x0, self.ellipsoid_mask.y0, self.ellipsoid_mask.z0)]
@@ -123,7 +125,7 @@ class TensorCompletionStructural(object):
         return self.ellipsoid_mask
     
     def get_timepoint_count(self):
-        self.time_point_count = int(self.missing_ratio*144)
+        self.time_point_count = int(self.missing_ratio*self.x_true_data.shape[3])
         self.logger.info("Time Point Count: " + str(self.time_point_count))
         return self.time_point_count
     
